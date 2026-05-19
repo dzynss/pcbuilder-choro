@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="1" author="ganga3pelos">
+        <createTable tableName="cotizaciones">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true"/></column>
+            <column name="id_usuario" type="BIGINT"/>
+            <column name="id_componente" type="BIGINT"/>
+            <column name="cantidad" type="INT"/>
+            <column name="total" type="DOUBLE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="losCabros">
+        <insert tableName="cotizaciones"><column name="id_usuario" value="1"/><column name="id_componente" value="1"/><column name="cantidad" value="1"/><column name="total" value="320000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="1"/><column name="id_componente" value="6"/><column name="cantidad" value="1"/><column name="total" value="250000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="2"/><column name="id_componente" value="2"/><column name="cantidad" value="2"/><column name="total" value="1300000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="3"/><column name="id_componente" value="4"/><column name="cantidad" value="1"/><column name="total" value="550000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="4"/><column name="id_componente" value="7"/><column name="cantidad" value="1"/><column name="total" value="210000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="5"/><column name="id_componente" value="8"/><column name="cantidad" value="1"/><column name="total" value="450000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="6"/><column name="id_componente" value="9"/><column name="cantidad" value="1"/><column name="total" value="480000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="7"/><column name="id_componente" value="10"/><column name="cantidad" value="2"/><column name="total" value="300000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="8"/><column name="id_componente" value="3"/><column name="cantidad" value="1"/><column name="total" value="290000"/></insert>
+        <insert tableName="cotizaciones"><column name="id_usuario" value="9"/><column name="id_componente" value="5"/><column name="cantidad" value="4"/><column name="total" value="1120000"/></insert>
+    </changeSet>
+</databaseChangeLog>

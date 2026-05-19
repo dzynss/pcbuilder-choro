@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="1" author="ganga3pelos">
+        <createTable tableName="usuarios">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true"/></column>
+            <column name="nombre" type="VARCHAR(255)"/>
+            <column name="correo" type="VARCHAR(255)"><constraints unique="true"/></column>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="rol" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="ganga3pelos">
+        <insert tableName="usuarios"><column name="nombre" value="El Bryan"/><column name="correo" value="bryan@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="ADMIN"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="La Jhendelyn"/><column name="correo" value="jhen@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Don Choco"/><column name="correo" value="choco@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Kevin"/><column name="correo" value="kevin@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Brayatan"/><column name="correo" value="brayatan@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Estefani"/><column name="correo" value="tefi@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="El Maicol"/><column name="correo" value="maicol@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Rosa Espinoza"/><column name="correo" value="rosa@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Chico Perez"/><column name="correo" value="chico@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="USER"/></insert>
+        <insert tableName="usuarios"><column name="nombre" value="Tia Rica"/><column name="correo" value="tia@pcbuilder.cl"/><column name="password" value="1234"/><column name="rol" value="ADMIN"/></insert>
+    </changeSet>
+</databaseChangeLog>

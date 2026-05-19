@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="1" author="ganga3pelos">
+        <createTable tableName="historial_logins">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true"/></column>
+            <column name="correo_usuario" type="VARCHAR(255)"/>
+            <column name="fecha_hora" type="DATETIME"/>
+            <column name="estado" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="ganga3pelos">
+        <insert tableName="historial_logins"><column name="correo_usuario" value="bryan@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-10T10:00:00"/><column name="estado" value="EXITOSO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="kevin@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-11T12:30:00"/><column name="estado" value="EXITOSO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="jhen@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-12T14:15:00"/><column name="estado" value="FALLIDO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="jhen@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-12T14:16:00"/><column name="estado" value="EXITOSO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="choco@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-13T09:00:00"/><column name="estado" value="EXITOSO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="tia@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-14T11:45:00"/><column name="estado" value="EXITOSO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="brayatan@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-15T16:20:00"/><column name="estado" value="FALLIDO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="brayatan@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-15T16:25:00"/><column name="estado" value="FALLIDO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="maicol@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-16T20:10:00"/><column name="estado" value="EXITOSO"/></insert>
+        <insert tableName="historial_logins"><column name="correo_usuario" value="rosa@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-17T08:05:00"/><column name="estado" value="EXITOSO"/></insert>
+    </changeSet>
+</databaseChangeLog>
