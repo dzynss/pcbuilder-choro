@@ -11,3 +11,4 @@ public class MsResenasApplication {
 	}
 
 }
+// http://localhost:8084/api/resenas

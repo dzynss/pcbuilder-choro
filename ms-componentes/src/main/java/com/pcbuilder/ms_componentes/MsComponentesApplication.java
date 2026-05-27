@@ -11,3 +11,4 @@ public class MsComponentesApplication {
 	}
 
 }
+//http://localhost:8085/api/componentes

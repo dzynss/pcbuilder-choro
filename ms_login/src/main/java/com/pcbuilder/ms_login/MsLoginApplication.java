@@ -11,3 +11,4 @@ public class MsLoginApplication {
 	}
 
 }
+// http://localhost:8086/api/auth
