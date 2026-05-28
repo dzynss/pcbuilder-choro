@@ -12,3 +12,4 @@ public class MsUsuariosApplication {
 
 }
 // http://localhost:8083/api/usuarios
+// http://localhost:8083/api/usuarios/login (login interno para administradores)

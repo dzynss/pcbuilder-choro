@@ -33,10 +33,10 @@ public class CotizacionService {
     public Cotizacion guardar(Cotizacion c) {
         try {
             // 1. Validamos que el loco exista en ms-usuarios (Puerto 8082)
-            restTemplate.getForObject("http://localhost:8082/api/usuarios/" + c.getIdUsuario(), Object.class);
+            restTemplate.getForObject("http://localhost:8083/api/usuarios/" + c.getIdUsuario(), Object.class);
             
             // 2. Traemos la pieza del ms-componentes (Puerto 8081) pa' sacar el precio
-            ComponenteDTO comp = restTemplate.getForObject("http://localhost:8081/api/componentes/" + c.getIdComponente(), ComponenteDTO.class);
+            ComponenteDTO comp = restTemplate.getForObject("http://localhost:8085/api/componentes/" + c.getIdComponente(), ComponenteDTO.class);
             
             // 3. Calculamos el total de las lucas
             c.setTotal(comp.precio * c.getCantidad());
