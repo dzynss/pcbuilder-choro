@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: crear-tabla-ofertas
+      author: equipo-pcbuilder
+      changes:
+        - createTable:
+            tableName: ofertas
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: codigo
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: porcentaje_descuento
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: activa
+                  type: boolean
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: poblar-ofertas-inicial
+      author: equipo-pcbuilder
+      changes:
+        - insert:
+            tableName: ofertas
+            columns:
+              - column: { name: codigo, value: "PCGAMER2026" }
+              - column: { name: porcentaje_descuento, valueNumeric: 15 }
+              - column: { name: activa, valueBoolean: true }
+        - insert:
+            tableName: ofertas
+            columns:
+              - column: { name: codigo, value: "PROFECARLOS" }
+              - column: { name: porcentaje_descuento, valueNumeric: 50 }
+              - column: { name: activa, valueBoolean: true }

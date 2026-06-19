@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: crear-tabla-soporte
+      author: equipo-pcbuilder
+      changes:
+        - createTable:
+            tableName: soporte_tickets
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: id_usuario
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_componente
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descripcion
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estado
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha_creacion
+                  type: datetime
+
+  - changeSet:
+      id: poblar-soporte-inicial
+      author: equipo-pcbuilder
+      changes:
+        - insert:
+            tableName: soporte_tickets
+            columns:
+              - column: { name: id_usuario, valueNumeric: 1 }
+              - column: { name: id_componente, valueNumeric: 1 }
+              - column: { name: descripcion, value: "La tarjeta de video me tira humo hermano" }
+              - column: { name: estado, value: "ABIERTO" }
+        - insert:
+            tableName: soporte_tickets
+            columns:
+              - column: { name: id_usuario, valueNumeric: 2 }
+              - column: { name: id_componente, valueNumeric: 3 }
+              - column: { name: descripcion, value: "No me prende la placa madre, venía mala" }
+              - column: { name: estado, value: "CERRADO" }

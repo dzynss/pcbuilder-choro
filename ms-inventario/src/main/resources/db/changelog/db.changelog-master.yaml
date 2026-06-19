@@ -1,0 +1,61 @@
+databaseChangeLog:
+  # PASO 1: El Liquibase construye la tabla primero
+  - changeSet:
+      id: crear-tabla-inventario
+      author: equipo-pcbuilder
+      changes:
+        - createTable:
+            tableName: inventario
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: id_componente
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cantidad_disponible
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ubicacion_bodega
+                  type: varchar(255)
+              - column:
+                  name: ultima_actualizacion
+                  type: datetime
+
+  # PASO 2: Ahora sí le mandamos los datos pa dentro
+  - changeSet:
+      id: poblar-inventario-inicial
+      author: equipo-pcbuilder
+      changes:
+        - insert:
+            tableName: inventario
+            columns:
+              - column:
+                  name: id_componente
+                  valueNumeric: 1
+              - column:
+                  name: cantidad_disponible
+                  valueNumeric: 50
+              - column:
+                  name: ubicacion_bodega
+                  value: "Pasillo A, Estante 1"
+        - insert:
+            tableName: inventario
+            columns:
+              - column:
+                  name: id_componente
+                  valueNumeric: 2
+              - column:
+                  name: cantidad_disponible
+                  valueNumeric: 15
+              - column:
+                  name: ubicacion_bodega
+                  value: "Pasillo B, Estante 3"
