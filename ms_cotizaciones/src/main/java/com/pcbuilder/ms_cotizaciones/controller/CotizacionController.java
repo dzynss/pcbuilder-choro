@@ -84,5 +84,4 @@ public class CotizacionController {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-    // tu mama
 }
