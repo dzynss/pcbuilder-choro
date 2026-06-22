@@ -1,14 +1,14 @@
-package com.pcbuilder.ms_inventario;
+package com.pcbuilder.ms_despachos;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MsInventarioApplication {
+public class MsDespachosApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MsInventarioApplication.class, args);
+		SpringApplication.run(MsDespachosApplication.class, args);
 	}
 
 }
-// http://localhost:9090/swagger-ui/index.html
+// http://localhost:9093/swagger-ui/index.html

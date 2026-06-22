@@ -11,3 +11,4 @@ public class MsSoporteApplication {
 	}
 
 }
+// http://localhost:9092/swagger-ui/index.html

@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: crear-tabla-notificaciones
+      author: equipo-pcbuilder
+      changes:
+        - createTable:
+            tableName: notificaciones
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: id_usuario
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tipo_mensaje
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contenido
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estado
+                  type: varchar(50)
+              - column:
+                  name: fecha_envio
+                  type: datetime
+
+  - changeSet:
+      id: poblar-notificaciones-inicial
+      author: equipo-pcbuilder
+      changes:
+        - insert:
+            tableName: notificaciones
+            columns:
+              - column: { name: id_usuario, valueNumeric: 1 }
+              - column: { name: tipo_mensaje, value: "EMAIL" }
+              - column: { name: contenido, value: "¡Wena! Tu PC ya va en camino." }
+              - column: { name: estado, value: "ENVIADO" }
+        - insert:
+            tableName: notificaciones
+            columns:
+              - column: { name: id_usuario, valueNumeric: 2 }
+              - column: { name: tipo_mensaje, value: "SMS" }
+              - column: { name: contenido, value: "Bienvenido a PC Builder, waxo." }
+              - column: { name: estado, value: "ENVIADO" }

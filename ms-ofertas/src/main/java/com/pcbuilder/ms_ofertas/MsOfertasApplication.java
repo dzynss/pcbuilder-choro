@@ -11,3 +11,4 @@ public class MsOfertasApplication {
 	}
 
 }
+// http://localhost:9091/swagger-ui/index.html

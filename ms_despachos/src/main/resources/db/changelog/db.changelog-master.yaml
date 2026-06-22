@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: crear-tabla-despachos
+      author: equipo-pcbuilder
+      changes:
+        - createTable:
+            tableName: despachos
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: id_usuario
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: direccion_envio
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: empresa_transporte
+                  type: varchar(100)
+              - column:
+                  name: estado_seguimiento
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha_despacho
+                  type: datetime
+
+  - changeSet:
+      id: poblar-despachos-inicial
+      author: equipo-pcbuilder
+      changes:
+        - insert:
+            tableName: despachos
+            columns:
+              - column: { name: id_usuario, valueNumeric: 1 }
+              - column: { name: direccion_envio, value: "Pasaje Los Vilos 123, Puente Alto" }
+              - column: { name: empresa_transporte, value: "Starken" }
+              - column: { name: estado_seguimiento, value: "EN_RUTA" }
+        - insert:
+            tableName: despachos
+            columns:
+              - column: { name: id_usuario, valueNumeric: 2 }
+              - column: { name: direccion_envio, value: "Av. Providencia 456, Depto 12" }
+              - column: { name: empresa_transporte, value: "Chilexpress" }
+              - column: { name: estado_seguimiento, value: "ENTREGADO" }
