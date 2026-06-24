@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: ms_cotizaciones
+  profiles:
+    active: dev
