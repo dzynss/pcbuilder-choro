@@ -1,5 +1,4 @@
 databaseChangeLog:
-  # PASO 1: El Liquibase construye la tabla primero
   - changeSet:
       id: crear-tabla-inventario
       author: equipo-pcbuilder
@@ -30,7 +29,6 @@ databaseChangeLog:
                   name: ultima_actualizacion
                   type: datetime
 
-  # PASO 2: Ahora sí le mandamos los datos pa dentro
   - changeSet:
       id: poblar-inventario-inicial
       author: equipo-pcbuilder
