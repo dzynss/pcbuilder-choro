@@ -1,6 +1,7 @@
 package com.pcbuilder.ms_despachos.controller;
 
-import com.pcbuilder.ms_despachos.entity.Despacho;
+import com.pcbuilder.ms_despachos.dto.DespachoRequestDTO;
+import com.pcbuilder.ms_despachos.dto.DespachoResponseDTO;
 import com.pcbuilder.ms_despachos.service.DespachoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -29,40 +29,36 @@ public class DespachoController {
 
     @Operation(summary = "Revisa todos los envíos que andan dando vuelta")
     @GetMapping
-    public ResponseEntity<List<EntityModel<Despacho>>> listarTodos() {
+    public ResponseEntity<List<EntityModel<DespachoResponseDTO>>> listarTodos() {
         log.info("Sapeando el libro de despachos");
-        
-        List<EntityModel<Despacho>> enviosConLinks = service.listarTodos().stream()
+        List<EntityModel<DespachoResponseDTO>> envios = service.listarTodos().stream()
                 .map(envio -> EntityModel.of(envio,
-                        linkTo(methodOn(DespachoController.class).buscarPorId(envio.getId())).withSelfRel(),
+                        linkTo(methodOn(DespachoController.class).buscarPorId(envio.id())).withSelfRel(),
                         linkTo(methodOn(DespachoController.class).listarTodos()).withRel("todos-los-despachos")))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(enviosConLinks);
+                .toList();
+        return ResponseEntity.ok(envios);
     }
 
     @Operation(summary = "Rastrea un envío por su ID")
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Despacho>> buscarPorId(@PathVariable Long id) {
-        Despacho envio = service.buscarPorId(id);
-        
-        EntityModel<Despacho> recurso = EntityModel.of(envio,
+    public ResponseEntity<EntityModel<DespachoResponseDTO>> buscarPorId(@PathVariable Long id) {
+        DespachoResponseDTO envio = service.buscarPorId(id);
+        EntityModel<DespachoResponseDTO> recurso = EntityModel.of(envio,
                 linkTo(methodOn(DespachoController.class).buscarPorId(id)).withSelfRel(),
                 linkTo(methodOn(DespachoController.class).listarTodos()).withRel("volver-a-despachos"));
-                
         return ResponseEntity.ok(recurso);
     }
 
-    @Operation(summary = "Registra una nueva caja pa' mandar")
+    @Operation(summary = "Registra una nueva encomienda (valida que el usuario exista)")
     @PostMapping
-    public ResponseEntity<Despacho> guardar(@Valid @RequestBody Despacho despacho) {
-        log.info("Armando la encomienda pal loco ID: {}", despacho.getIdUsuario());
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(despacho));
+    public ResponseEntity<DespachoResponseDTO> guardar(@Valid @RequestBody DespachoRequestDTO dto) {
+        log.info("Armando la encomienda pal usuario ID: {}", dto.idUsuario());
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
     @Operation(summary = "Le cambia el estado a la caja (ej: EN_RUTA)")
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<Despacho> actualizarEstado(@PathVariable Long id, @RequestParam String estado) {
+    public ResponseEntity<DespachoResponseDTO> actualizarEstado(@PathVariable Long id, @RequestParam String estado) {
         log.info("Avisando que el paquete {} ahora está: {}", id, estado);
         return ResponseEntity.ok(service.actualizarEstado(id, estado));
     }

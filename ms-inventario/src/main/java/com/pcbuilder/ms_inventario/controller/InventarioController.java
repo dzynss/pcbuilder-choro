@@ -1,6 +1,7 @@
 package com.pcbuilder.ms_inventario.controller;
 
-import com.pcbuilder.ms_inventario.entity.Inventario;
+import com.pcbuilder.ms_inventario.dto.InventarioRequestDTO;
+import com.pcbuilder.ms_inventario.dto.InventarioResponseDTO;
 import com.pcbuilder.ms_inventario.service.InventarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,13 +9,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -30,38 +29,32 @@ public class InventarioController {
 
     @Operation(summary = "Saca todos los registros de la bodega")
     @GetMapping
-    public ResponseEntity<List<EntityModel<Inventario>>> listarTodos() {
+    public ResponseEntity<List<EntityModel<InventarioResponseDTO>>> listarTodos() {
         log.info("Listando toda la merca del inventario");
-        
-        // Magia del HATEOAS: Le pegamos el link a cada elemento de la lista
-        List<EntityModel<Inventario>> inventarioConLinks = service.listarTodos().stream()
+        List<EntityModel<InventarioResponseDTO>> inventario = service.listarTodos().stream()
                 .map(inv -> EntityModel.of(inv,
-                        linkTo(methodOn(InventarioController.class).buscarPorId(inv.getId())).withSelfRel(),
+                        linkTo(methodOn(InventarioController.class).buscarPorId(inv.id())).withSelfRel(),
                         linkTo(methodOn(InventarioController.class).listarTodos()).withRel("inventario-completo")))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(inventarioConLinks);
+                .toList();
+        return ResponseEntity.ok(inventario);
     }
 
     @Operation(summary = "Busca el stock de una pieza por su ID interno")
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Inventario>> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<InventarioResponseDTO>> buscarPorId(@PathVariable Long id) {
         log.info("Buscando el registro de inventario con ID: {}", id);
-        Inventario inv = service.buscarPorId(id);
-        
-        // HATEOAS pa' un solo registro
-        EntityModel<Inventario> recurso = EntityModel.of(inv,
+        InventarioResponseDTO inv = service.buscarPorId(id);
+        EntityModel<InventarioResponseDTO> recurso = EntityModel.of(inv,
                 linkTo(methodOn(InventarioController.class).buscarPorId(id)).withSelfRel(),
                 linkTo(methodOn(InventarioController.class).listarTodos()).withRel("volver-al-inventario"));
-                
         return ResponseEntity.ok(recurso);
     }
 
     @Operation(summary = "Agrega nueva merca a la bodega")
     @PostMapping
-    public ResponseEntity<Inventario> guardar(@Valid @RequestBody Inventario inventario) {
-        log.info("Guardando nueva merca pal componente ID: {}", inventario.getIdComponente());
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(inventario));
+    public ResponseEntity<InventarioResponseDTO> guardar(@Valid @RequestBody InventarioRequestDTO dto) {
+        log.info("Guardando nueva merca pal componente ID: {}", dto.idComponente());
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
     @Operation(summary = "Borra un registro si se quemó la bodega")

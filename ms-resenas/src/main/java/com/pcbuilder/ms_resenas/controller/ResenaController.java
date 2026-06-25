@@ -1,62 +1,79 @@
 package com.pcbuilder.ms_resenas.controller;
 
-import com.pcbuilder.ms_resenas.entity.Resena;
+import com.pcbuilder.ms_resenas.dto.ResenaRequestDTO;
+import com.pcbuilder.ms_resenas.dto.ResenaResponseDTO;
 import com.pcbuilder.ms_resenas.service.ResenaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping("/api/resenas")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Reseñas", description = "Comentarios y calificaciones de los componentes")
 public class ResenaController {
 
     private final ResenaService service;
 
+    @Operation(summary = "Lista todas las reseñas")
     @GetMapping
-    public ResponseEntity<List<Resena>> listar() {
+    public ResponseEntity<List<EntityModel<ResenaResponseDTO>>> listar() {
         log.info("Tasando todas las reseñas");
-        return ResponseEntity.ok(service.buscarTodos());
+        List<EntityModel<ResenaResponseDTO>> resenas = service.buscarTodos().stream()
+                .map(r -> EntityModel.of(r,
+                        linkTo(methodOn(ResenaController.class).buscarUno(r.id())).withSelfRel(),
+                        linkTo(methodOn(ResenaController.class).listar()).withRel("todas-las-resenas")))
+                .toList();
+        return ResponseEntity.ok(resenas);
     }
 
+    @Operation(summary = "Busca una reseña por su ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Resena> buscarUno(@PathVariable Long id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<EntityModel<ResenaResponseDTO>> buscarUno(@PathVariable Long id) {
+        ResenaResponseDTO resena = service.buscarPorId(id);
+        EntityModel<ResenaResponseDTO> recurso = EntityModel.of(resena,
+                linkTo(methodOn(ResenaController.class).buscarUno(id)).withSelfRel(),
+                linkTo(methodOn(ResenaController.class).listar()).withRel("todas-las-resenas"));
+        return ResponseEntity.ok(recurso);
     }
 
-    // busqueda por atributo distinto (estrellas)
+    @Operation(summary = "Busca reseñas por cantidad de estrellas")
     @GetMapping("/estrellas/{calificacion}")
-    public ResponseEntity<List<Resena>> buscarPorCalificacion(@PathVariable Integer calificacion) {
+    public ResponseEntity<List<EntityModel<ResenaResponseDTO>>> buscarPorCalificacion(@PathVariable Integer calificacion) {
         log.info("Buscando las reseñas que tengan {} estrellas", calificacion);
-        return ResponseEntity.ok(service.buscarPorEstrellas(calificacion));
+        List<EntityModel<ResenaResponseDTO>> resenas = service.buscarPorEstrellas(calificacion).stream()
+                .map(r -> EntityModel.of(r,
+                        linkTo(methodOn(ResenaController.class).buscarUno(r.id())).withSelfRel()))
+                .toList();
+        return ResponseEntity.ok(resenas);
     }
 
+    @Operation(summary = "Crea una nueva reseña (valida que el componente exista en ms-componentes)")
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Resena r) {
-        log.info("El loco {} quiere dejar un comentario pal componente {}", r.getAutor(), r.getIdComponente());
-        try {
-            return new ResponseEntity<>(service.guardar(r), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            log.error("Error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<ResenaResponseDTO> crear(@Valid @RequestBody ResenaRequestDTO dto) {
+        log.info("El autor {} quiere dejar un comentario pal componente {}", dto.autor(), dto.idComponente());
+        return new ResponseEntity<>(service.guardar(dto), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Actualiza una reseña existente")
     @PutMapping("/{id}")
-    public ResponseEntity<Resena> actualizar(@PathVariable Long id, @RequestBody Resena r) {
-        Resena existe = service.buscarPorId(id);
-        existe.setAutor(r.getAutor());
-        existe.setComentario(r.getComentario());
-        existe.setCalificacion(r.getCalificacion());
-        existe.setIdComponente(r.getIdComponente());
-        return ResponseEntity.ok(service.guardar(existe)); // volvera a validar con el otro ms
+    public ResponseEntity<ResenaResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ResenaRequestDTO dto) {
+        return ResponseEntity.ok(service.actualizar(id, dto));
     }
 
+    @Operation(summary = "Elimina una reseña")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> borrar(@PathVariable Long id) {
         log.warn("Borrando la reseña ID: {}", id);

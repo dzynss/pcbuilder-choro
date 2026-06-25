@@ -1,55 +1,102 @@
 package com.pcbuilder.ms_cotizaciones.service;
 
+import com.pcbuilder.ms_cotizaciones.client.ComponenteClient;
+import com.pcbuilder.ms_cotizaciones.client.UsuarioClient;
+import com.pcbuilder.ms_cotizaciones.dto.ComponenteResponseDTO;
+import com.pcbuilder.ms_cotizaciones.dto.CotizacionRequestDTO;
+import com.pcbuilder.ms_cotizaciones.dto.CotizacionResponseDTO;
+import com.pcbuilder.ms_cotizaciones.entity.Cotizacion;
+import com.pcbuilder.ms_cotizaciones.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_cotizaciones.exception.RecursoNoEncontradoException;
+import com.pcbuilder.ms_cotizaciones.repository.CotizacionRepository;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import com.pcbuilder.ms_cotizaciones.entity.Cotizacion;
-import com.pcbuilder.ms_cotizaciones.repository.CotizacionRepository;
-
 @Service
+@RequiredArgsConstructor
 public class CotizacionService {
-    
+
     private final CotizacionRepository repo;
-    private final RestTemplate restTemplate;
+    private final UsuarioClient usuarioClient;
+    private final ComponenteClient componenteClient;
 
-    public CotizacionService(CotizacionRepository repo) {
-        this.repo = repo;
-        this.restTemplate = new RestTemplate();
+    public List<CotizacionResponseDTO> buscarTodos() {
+        return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
-    public List<Cotizacion> buscarTodos() { return repo.findAll(); }
-    public Cotizacion buscarPorId(Long id) { return repo.findById(id).orElseThrow(); }
-    public void eliminar(Long id) { repo.deleteById(id); }
-    public List<Cotizacion> buscarPorUsuario(Long idUsuario) { return repo.findByIdUsuario(idUsuario); }
-
-    // Clase piola pa' recibir el precio del otro microservicio
-    static class ComponenteDTO {
-        public Double precio;
+    public CotizacionResponseDTO buscarPorId(Long id) {
+        return aResponseDTO(buscarEntidadPorId(id));
     }
 
-    // EL GUARDADO CON LLAMADA A 2 MICROSERVICIOS DISTINTOS
-    public Cotizacion guardar(Cotizacion c) {
+    public List<CotizacionResponseDTO> buscarPorUsuario(Long idUsuario) {
+        return repo.findByIdUsuario(idUsuario).stream().map(this::aResponseDTO).toList();
+    }
+
+    public Double calcularTotalPorUsuario(Long idUsuario) {
+        return repo.findByIdUsuario(idUsuario).stream().mapToDouble(Cotizacion::getTotal).sum();
+    }
+
+    /** Valida usuario y componente en sus respectivos microservicios y calcula el total con el precio real. */
+    public CotizacionResponseDTO guardar(CotizacionRequestDTO dto) {
+        validarUsuarioExiste(dto.idUsuario());
+        ComponenteResponseDTO componente = obtenerComponente(dto.idComponente());
+
+        Cotizacion c = new Cotizacion();
+        c.setIdUsuario(dto.idUsuario());
+        c.setIdComponente(dto.idComponente());
+        c.setCantidad(dto.cantidad());
+        c.setTotal(componente.precio() * dto.cantidad());
+
+        return aResponseDTO(repo.save(c));
+    }
+
+    public CotizacionResponseDTO actualizar(Long id, CotizacionRequestDTO dto) {
+        Cotizacion existente = buscarEntidadPorId(id);
+        validarUsuarioExiste(dto.idUsuario());
+        ComponenteResponseDTO componente = obtenerComponente(dto.idComponente());
+
+        existente.setIdUsuario(dto.idUsuario());
+        existente.setIdComponente(dto.idComponente());
+        existente.setCantidad(dto.cantidad());
+        existente.setTotal(componente.precio() * dto.cantidad());
+
+        return aResponseDTO(repo.save(existente));
+    }
+
+    public void eliminar(Long id) {
+        buscarEntidadPorId(id);
+        repo.deleteById(id);
+    }
+
+    private void validarUsuarioExiste(Long idUsuario) {
         try {
-            // 1. Validamos que el loco exista en ms-usuarios (Puerto 8082)
-            restTemplate.getForObject("http://localhost:8083/api/usuarios/" + c.getIdUsuario(), Object.class);
-            
-            // 2. Traemos la pieza del ms-componentes (Puerto 8081) pa' sacar el precio
-            ComponenteDTO comp = restTemplate.getForObject("http://localhost:8085/api/componentes/" + c.getIdComponente(), ComponenteDTO.class);
-            
-            // 3. Calculamos el total de las lucas
-            c.setTotal(comp.precio * c.getCantidad());
-            
-            return repo.save(c);
-        } catch (Exception e) {
-            throw new RuntimeException("¡Te pillé po compadre! El usuario no existe o la pieza no está registrada.");
+            usuarioClient.buscarPorId(idUsuario);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El usuario " + idUsuario + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-usuarios no respondió correctamente: " + e.getMessage());
         }
     }
 
-    // Calcular el total gastado por un loco
-    public Double calcularTotalPorUsuario(Long idUsuario) {
-        List<Cotizacion> lista = repo.findByIdUsuario(idUsuario);
-        return lista.stream().mapToDouble(Cotizacion::getTotal).sum();
+    private ComponenteResponseDTO obtenerComponente(Long idComponente) {
+        try {
+            return componenteClient.buscarPorId(idComponente);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El componente " + idComponente + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-componentes no respondió correctamente: " + e.getMessage());
+        }
+    }
+
+    private Cotizacion buscarEntidadPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("La cotización con ID " + id + " no existe."));
+    }
+
+    private CotizacionResponseDTO aResponseDTO(Cotizacion c) {
+        return new CotizacionResponseDTO(c.getId(), c.getIdUsuario(), c.getIdComponente(), c.getCantidad(), c.getTotal());
     }
 }

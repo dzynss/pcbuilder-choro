@@ -1,0 +1,189 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pcbuilder-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pcbuilder-mysql-data:/var/lib/mysql
+
+  ms-usuarios:
+    build: ./ms-usuarios
+    ports: ["8083:8083"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+  ms-resenas:
+    build: ./ms-resenas
+    ports: ["8084:8084"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ms-componentes:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MS_COMPONENTES_URL: http://ms-componentes:8085
+
+  ms-componentes:
+    build: ./ms-componentes
+    ports: ["8085:8085"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+  ms-login:
+    build: ./ms_login
+    ports: ["8086:8086"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MS_USUARIOS_URL: http://ms-usuarios:8083
+
+  ms-cotizaciones:
+    build: ./ms_cotizaciones
+    ports: ["8087:8087"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+      ms-componentes:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MS_USUARIOS_URL: http://ms-usuarios:8083
+      MS_COMPONENTES_URL: http://ms-componentes:8085
+
+  ms-inventario:
+    build: ./ms-inventario
+    ports: ["9090:9090"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+  ms-ofertas:
+    build: ./ms-ofertas
+    ports: ["9091:9091"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+  ms-soporte:
+    build: ./ms-soporte
+    ports: ["9092:9092"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+      ms-componentes:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MS_USUARIOS_URL: http://ms-usuarios:8083
+      MS_COMPONENTES_URL: http://ms-componentes:8085
+
+  ms-despachos:
+    build: ./ms_despachos
+    ports: ["9093:9093"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MS_USUARIOS_URL: http://ms-usuarios:8083
+
+  ms-notificaciones:
+    build: ./ms_notificaciones
+    ports: ["9094:9094"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MS_USUARIOS_URL: http://ms-usuarios:8083
+
+  ms-gateway:
+    build: ./ms-gateway
+    ports: ["8080:8080"]
+    depends_on:
+      - ms-usuarios
+      - ms-resenas
+      - ms-componentes
+      - ms-login
+      - ms-cotizaciones
+      - ms-inventario
+      - ms-ofertas
+      - ms-soporte
+      - ms-despachos
+      - ms-notificaciones
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MS_USUARIOS_URL: http://ms-usuarios:8083
+      MS_RESENAS_URL: http://ms-resenas:8084
+      MS_COMPONENTES_URL: http://ms-componentes:8085
+      MS_LOGIN_URL: http://ms-login:8086
+      MS_COTIZACIONES_URL: http://ms-cotizaciones:8087
+      MS_INVENTARIO_URL: http://ms-inventario:9090
+      MS_OFERTAS_URL: http://ms-ofertas:9091
+      MS_SOPORTE_URL: http://ms-soporte:9092
+      MS_DESPACHOS_URL: http://ms-despachos:9093
+      MS_NOTIFICACIONES_URL: http://ms-notificaciones:9094
+
+volumes:
+  pcbuilder-mysql-data:

@@ -1,47 +1,75 @@
 package com.pcbuilder.ms_despachos.service;
 
+import com.pcbuilder.ms_despachos.client.UsuarioClient;
+import com.pcbuilder.ms_despachos.dto.DespachoRequestDTO;
+import com.pcbuilder.ms_despachos.dto.DespachoResponseDTO;
 import com.pcbuilder.ms_despachos.entity.Despacho;
+import com.pcbuilder.ms_despachos.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_despachos.exception.RecursoNoEncontradoException;
 import com.pcbuilder.ms_despachos.repository.DespachoRepository;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DespachoService {
 
     private final DespachoRepository repo;
-    private final RestTemplate restTemplate;
+    private final UsuarioClient usuarioClient;
 
-    public DespachoService(DespachoRepository repo) {
-        this.repo = repo;
-        this.restTemplate = new RestTemplate();
+    public List<DespachoResponseDTO> listarTodos() {
+        return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
-    public List<Despacho> listarTodos() { return repo.findAll(); }
-
-    public Despacho buscarPorId(Long id) {
-        return repo.findById(id).orElseThrow(() -> new RuntimeException("No pillamos ese número de seguimiento."));
+    public DespachoResponseDTO buscarPorId(Long id) {
+        return aResponseDTO(buscarEntidadPorId(id));
     }
 
-    public Despacho guardar(Despacho despacho) {
-        // Le pegamos un telefonazo al ms-usuarios (Puerto 8083) pa' ver si el cliente es de verdad
-        try {
-            restTemplate.getForObject("http://localhost:8083/api/usuarios/" + despacho.getIdUsuario(), Object.class);
-        } catch (Exception e) {
-            throw new RuntimeException("¡Pifia! Ese usuario no existe, ¿a quién chucha le estay mandando la caja?");
-        }
+    public DespachoResponseDTO guardar(DespachoRequestDTO dto) {
+        validarUsuarioExiste(dto.idUsuario());
 
+        Despacho despacho = new Despacho();
+        despacho.setIdUsuario(dto.idUsuario());
+        despacho.setDireccionEnvio(dto.direccionEnvio());
+        despacho.setEmpresaTransporte(dto.empresaTransporte());
         despacho.setEstadoSeguimiento("BODEGA");
         despacho.setFechaDespacho(LocalDateTime.now());
-        return repo.save(despacho);
+
+        return aResponseDTO(repo.save(despacho));
     }
 
-    public Despacho actualizarEstado(Long id, String nuevoEstado) {
-        Despacho despacho = buscarPorId(id);
+    public DespachoResponseDTO actualizarEstado(Long id, String nuevoEstado) {
+        Despacho despacho = buscarEntidadPorId(id);
         despacho.setEstadoSeguimiento(nuevoEstado);
-        return repo.save(despacho);
+        return aResponseDTO(repo.save(despacho));
     }
 
-    public void eliminar(Long id) { repo.deleteById(id); }
+    public void eliminar(Long id) {
+        buscarEntidadPorId(id);
+        repo.deleteById(id);
+    }
+
+    private void validarUsuarioExiste(Long idUsuario) {
+        try {
+            usuarioClient.buscarPorId(idUsuario);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El usuario " + idUsuario + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-usuarios no respondió correctamente: " + e.getMessage());
+        }
+    }
+
+    private Despacho buscarEntidadPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("El despacho con ID " + id + " no existe."));
+    }
+
+    private DespachoResponseDTO aResponseDTO(Despacho d) {
+        return new DespachoResponseDTO(d.getId(), d.getIdUsuario(), d.getDireccionEnvio(),
+                d.getEmpresaTransporte(), d.getEstadoSeguimiento(), d.getFechaDespacho());
+    }
 }

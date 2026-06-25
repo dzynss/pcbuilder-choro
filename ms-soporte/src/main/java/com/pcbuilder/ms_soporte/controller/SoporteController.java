@@ -1,6 +1,7 @@
 package com.pcbuilder.ms_soporte.controller;
 
-import com.pcbuilder.ms_soporte.entity.TicketSoporte;
+import com.pcbuilder.ms_soporte.dto.TicketRequestDTO;
+import com.pcbuilder.ms_soporte.dto.TicketResponseDTO;
 import com.pcbuilder.ms_soporte.service.SoporteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -22,47 +22,43 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/soporte")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Soporte Técnico", description = "Donde los locos vienen a llorar por sus piezas")
+@Tag(name = "Soporte Técnico", description = "Donde los usuarios reclaman por sus piezas")
 public class SoporteController {
 
     private final SoporteService service;
 
     @Operation(summary = "Saca todos los reclamos")
     @GetMapping
-    public ResponseEntity<List<EntityModel<TicketSoporte>>> listarTodos() {
+    public ResponseEntity<List<EntityModel<TicketResponseDTO>>> listarTodos() {
         log.info("Sapeando todos los tickets de soporte");
-        
-        List<EntityModel<TicketSoporte>> ticketsConLinks = service.listarTodos().stream()
+        List<EntityModel<TicketResponseDTO>> tickets = service.listarTodos().stream()
                 .map(ticket -> EntityModel.of(ticket,
-                        linkTo(methodOn(SoporteController.class).buscarPorId(ticket.getId())).withSelfRel(),
+                        linkTo(methodOn(SoporteController.class).buscarPorId(ticket.id())).withSelfRel(),
                         linkTo(methodOn(SoporteController.class).listarTodos()).withRel("todos-los-tickets")))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(ticketsConLinks);
+                .toList();
+        return ResponseEntity.ok(tickets);
     }
 
     @Operation(summary = "Busca un ticket específico")
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<TicketSoporte>> buscarPorId(@PathVariable Long id) {
-        TicketSoporte ticket = service.buscarPorId(id);
-        
-        EntityModel<TicketSoporte> recurso = EntityModel.of(ticket,
+    public ResponseEntity<EntityModel<TicketResponseDTO>> buscarPorId(@PathVariable Long id) {
+        TicketResponseDTO ticket = service.buscarPorId(id);
+        EntityModel<TicketResponseDTO> recurso = EntityModel.of(ticket,
                 linkTo(methodOn(SoporteController.class).buscarPorId(id)).withSelfRel(),
                 linkTo(methodOn(SoporteController.class).listarTodos()).withRel("volver-a-tickets"));
-                
         return ResponseEntity.ok(recurso);
     }
 
-    @Operation(summary = "Abre un nuevo reclamo (Valida en Usuarios y Componentes)")
+    @Operation(summary = "Abre un nuevo reclamo (valida en ms-usuarios y ms-componentes)")
     @PostMapping
-    public ResponseEntity<TicketSoporte> guardar(@Valid @RequestBody TicketSoporte ticket) {
-        log.info("El loco ID: {} viene a dejar la cagá por la pieza ID: {}", ticket.getIdUsuario(), ticket.getIdComponente());
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(ticket));
+    public ResponseEntity<TicketResponseDTO> guardar(@Valid @RequestBody TicketRequestDTO dto) {
+        log.info("El usuario ID: {} reclama por la pieza ID: {}", dto.idUsuario(), dto.idComponente());
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
-    @Operation(summary = "Da por solucionado el atado")
+    @Operation(summary = "Da por solucionado el ticket")
     @PutMapping("/{id}/cerrar")
-    public ResponseEntity<TicketSoporte> cerrarTicket(@PathVariable Long id) {
+    public ResponseEntity<TicketResponseDTO> cerrarTicket(@PathVariable Long id) {
         log.info("Cerrando el ticket ID: {}", id);
         return ResponseEntity.ok(service.cerrarTicket(id));
     }

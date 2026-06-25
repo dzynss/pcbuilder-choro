@@ -1,46 +1,79 @@
 package com.pcbuilder.ms_resenas.service;
 
+import com.pcbuilder.ms_resenas.client.ComponenteClient;
+import com.pcbuilder.ms_resenas.dto.ResenaRequestDTO;
+import com.pcbuilder.ms_resenas.dto.ResenaResponseDTO;
 import com.pcbuilder.ms_resenas.entity.Resena;
+import com.pcbuilder.ms_resenas.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_resenas.exception.RecursoNoEncontradoException;
 import com.pcbuilder.ms_resenas.repository.ResenaRepository;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ResenaService {
 
     private final ResenaRepository repo;
-    private final RestTemplate restTemplate;
+    private final ComponenteClient componenteClient;
 
-    // Inyectamos el repo y armamos el teléfono normal (RestTemplate)
-    public ResenaService(ResenaRepository repo) {
-        this.repo = repo;
-        this.restTemplate = new RestTemplate();
+    public List<ResenaResponseDTO> buscarTodos() {
+        return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
-    public List<Resena> buscarTodos() { return repo.findAll(); }
-    public Resena buscarPorId(Long id) { return repo.findById(id).orElseThrow(); }
-    public void eliminar(Long id) { repo.deleteById(id); }
-
-    public List<Resena> buscarPorEstrellas(Integer calificacion) {
-        return repo.findByCalificacion(calificacion);
+    public ResenaResponseDTO buscarPorId(Long id) {
+        return aResponseDTO(buscarEntidadPorId(id));
     }
 
-    // EL GUARDADO USANDO RESTTEMPLATE PA' SALVAR LA PLATA
-    public Resena guardar(Resena resena) {
+    public List<ResenaResponseDTO> buscarPorEstrellas(Integer calificacion) {
+        return repo.findByCalificacion(calificacion).stream().map(this::aResponseDTO).toList();
+    }
+
+    public ResenaResponseDTO guardar(ResenaRequestDTO dto) {
+        validarComponenteExiste(dto.idComponente());
+        Resena r = new Resena();
+        mapearDatos(r, dto);
+        return aResponseDTO(repo.save(r));
+    }
+
+    public ResenaResponseDTO actualizar(Long id, ResenaRequestDTO dto) {
+        validarComponenteExiste(dto.idComponente());
+        Resena existente = buscarEntidadPorId(id);
+        mapearDatos(existente, dto);
+        return aResponseDTO(repo.save(existente));
+    }
+
+    public void eliminar(Long id) {
+        buscarEntidadPorId(id);
+        repo.deleteById(id);
+    }
+
+    private void validarComponenteExiste(Long idComponente) {
         try {
-            // Le pegamos el grito al ms-componentes. 
-            // OJO: Asumiendo que Componentes sigue corriendo en el puerto 8081
-            String url = "http://localhost:8085/api/componentes/" + resena.getIdComponente();
-
-            restTemplate.getForObject(url, Object.class);
-
-            // Si el componente existe, guardamos la reseña
-            return repo.save(resena);
-        } catch (Exception e) {
-            // Si nos tiran la foca o no contesta, atajamos el condoro
-            throw new RuntimeException("¡Vo' soy vio! Ese componente no existe o el servidor está apagao.");
+            componenteClient.buscarPorId(idComponente);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El componente " + idComponente + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-componentes no respondió correctamente: " + e.getMessage());
         }
     }
-} 
+
+    private void mapearDatos(Resena r, ResenaRequestDTO dto) {
+        r.setAutor(dto.autor());
+        r.setComentario(dto.comentario());
+        r.setCalificacion(dto.calificacion());
+        r.setIdComponente(dto.idComponente());
+    }
+
+    private Resena buscarEntidadPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("La reseña con ID " + id + " no existe."));
+    }
+
+    private ResenaResponseDTO aResponseDTO(Resena r) {
+        return new ResenaResponseDTO(r.getId(), r.getAutor(), r.getComentario(), r.getCalificacion(), r.getIdComponente());
+    }
+}

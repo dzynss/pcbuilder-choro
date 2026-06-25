@@ -1,42 +1,69 @@
 package com.pcbuilder.ms_notificaciones.service;
 
+import com.pcbuilder.ms_notificaciones.client.UsuarioClient;
+import com.pcbuilder.ms_notificaciones.dto.NotificacionRequestDTO;
+import com.pcbuilder.ms_notificaciones.dto.NotificacionResponseDTO;
 import com.pcbuilder.ms_notificaciones.entity.Notificacion;
+import com.pcbuilder.ms_notificaciones.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_notificaciones.exception.RecursoNoEncontradoException;
 import com.pcbuilder.ms_notificaciones.repository.NotificacionRepository;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NotificacionService {
 
     private final NotificacionRepository repo;
-    private final RestTemplate restTemplate;
+    private final UsuarioClient usuarioClient;
 
-    public NotificacionService(NotificacionRepository repo) {
-        this.repo = repo;
-        this.restTemplate = new RestTemplate();
+    public List<NotificacionResponseDTO> listarTodas() {
+        return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
-    public List<Notificacion> listarTodas() { return repo.findAll(); }
-
-    public Notificacion buscarPorId(Long id) {
-        return repo.findById(id).orElseThrow(() -> new RuntimeException("Ese mensaje no existe, hermano."));
+    public NotificacionResponseDTO buscarPorId(Long id) {
+        return aResponseDTO(buscarEntidadPorId(id));
     }
 
-    public Notificacion guardar(Notificacion noti) {
-        // Le preguntamos al ms-usuarios (Puerto 8083) si el loco existe
-        try {
-            restTemplate.getForObject("http://localhost:8083/api/usuarios/" + noti.getIdUsuario(), Object.class);
-        } catch (Exception e) {
-            // Manejamos el condoro remoto pa' que no explote la app [cite: 41, 57]
-            throw new RuntimeException("¡Atajando pifia! Ese usuario no está en los registros.");
-        }
+    public NotificacionResponseDTO guardar(NotificacionRequestDTO dto) {
+        validarUsuarioExiste(dto.idUsuario());
 
+        Notificacion noti = new Notificacion();
+        noti.setIdUsuario(dto.idUsuario());
+        noti.setTipoMensaje(dto.tipoMensaje());
+        noti.setContenido(dto.contenido());
         noti.setEstado("ENVIADO");
         noti.setFechaEnvio(LocalDateTime.now());
-        return repo.save(noti);
+
+        return aResponseDTO(repo.save(noti));
     }
 
-    public void eliminar(Long id) { repo.deleteById(id); }
+    public void eliminar(Long id) {
+        buscarEntidadPorId(id);
+        repo.deleteById(id);
+    }
+
+    private void validarUsuarioExiste(Long idUsuario) {
+        try {
+            usuarioClient.buscarPorId(idUsuario);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El usuario " + idUsuario + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-usuarios no respondió correctamente: " + e.getMessage());
+        }
+    }
+
+    private Notificacion buscarEntidadPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("La notificación con ID " + id + " no existe."));
+    }
+
+    private NotificacionResponseDTO aResponseDTO(Notificacion n) {
+        return new NotificacionResponseDTO(n.getId(), n.getIdUsuario(), n.getTipoMensaje(),
+                n.getContenido(), n.getEstado(), n.getFechaEnvio());
+    }
 }

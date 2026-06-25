@@ -1,55 +1,88 @@
 package com.pcbuilder.ms_soporte.service;
 
+import com.pcbuilder.ms_soporte.client.ComponenteClient;
+import com.pcbuilder.ms_soporte.client.UsuarioClient;
+import com.pcbuilder.ms_soporte.dto.TicketRequestDTO;
+import com.pcbuilder.ms_soporte.dto.TicketResponseDTO;
 import com.pcbuilder.ms_soporte.entity.TicketSoporte;
+import com.pcbuilder.ms_soporte.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_soporte.exception.RecursoNoEncontradoException;
 import com.pcbuilder.ms_soporte.repository.TicketRepository;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SoporteService {
 
     private final TicketRepository repo;
-    private final RestTemplate restTemplate;
+    private final UsuarioClient usuarioClient;
+    private final ComponenteClient componenteClient;
 
-    public SoporteService(TicketRepository repo) {
-        this.repo = repo;
-        this.restTemplate = new RestTemplate();
+    public List<TicketResponseDTO> listarTodos() {
+        return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
-    public List<TicketSoporte> listarTodos() { return repo.findAll(); }
-
-    public TicketSoporte buscarPorId(Long id) {
-        return repo.findById(id).orElseThrow(() -> new RuntimeException("Ese ticket no existe, compare."));
+    public TicketResponseDTO buscarPorId(Long id) {
+        return aResponseDTO(buscarEntidadPorId(id));
     }
 
-    public TicketSoporte guardar(TicketSoporte ticket) {
-        // 1. Verificamos si el loco existe (Pegándole al puerto 8083 de ms-usuarios)
-        try {
-            restTemplate.getForObject("http://localhost:8083/api/usuarios/" + ticket.getIdUsuario(), Object.class);
-        } catch (Exception e) {
-            throw new RuntimeException("¡Vo' soy vio! Ese usuario no existe en la base de datos.");
-        }
+    public TicketResponseDTO guardar(TicketRequestDTO dto) {
+        validarUsuarioExiste(dto.idUsuario());
+        validarComponenteExiste(dto.idComponente());
 
-        // 2. Verificamos si la pieza existe (Pegándole al puerto 8085 de ms-componentes)
-        try {
-            restTemplate.getForObject("http://localhost:8085/api/componentes/" + ticket.getIdComponente(), Object.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Media pifia. Esa pieza no la vendemos nosotros.");
-        }
-
-        // Si todo sale bacán, preparamos el ticket y lo guardamos
+        TicketSoporte ticket = new TicketSoporte();
+        ticket.setIdUsuario(dto.idUsuario());
+        ticket.setIdComponente(dto.idComponente());
+        ticket.setDescripcion(dto.descripcion());
         ticket.setEstado("ABIERTO");
         ticket.setFechaCreacion(LocalDateTime.now());
-        return repo.save(ticket);
-    }
-    
-    public TicketSoporte cerrarTicket(Long id) {
-        TicketSoporte ticket = buscarPorId(id);
-        ticket.setEstado("CERRADO");
-        return repo.save(ticket);
+
+        return aResponseDTO(repo.save(ticket));
     }
 
-    public void eliminar(Long id) { repo.deleteById(id); }
+    public TicketResponseDTO cerrarTicket(Long id) {
+        TicketSoporte ticket = buscarEntidadPorId(id);
+        ticket.setEstado("CERRADO");
+        return aResponseDTO(repo.save(ticket));
+    }
+
+    public void eliminar(Long id) {
+        buscarEntidadPorId(id);
+        repo.deleteById(id);
+    }
+
+    private void validarUsuarioExiste(Long idUsuario) {
+        try {
+            usuarioClient.buscarPorId(idUsuario);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El usuario " + idUsuario + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-usuarios no respondió correctamente: " + e.getMessage());
+        }
+    }
+
+    private void validarComponenteExiste(Long idComponente) {
+        try {
+            componenteClient.buscarPorId(idComponente);
+        } catch (FeignException.NotFound e) {
+            throw new RecursoNoEncontradoException("El componente " + idComponente + " no existe.");
+        } catch (FeignException e) {
+            throw new ErrorComunicacionException("ms-componentes no respondió correctamente: " + e.getMessage());
+        }
+    }
+
+    private TicketSoporte buscarEntidadPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("El ticket con ID " + id + " no existe."));
+    }
+
+    private TicketResponseDTO aResponseDTO(TicketSoporte t) {
+        return new TicketResponseDTO(t.getId(), t.getIdUsuario(), t.getIdComponente(),
+                t.getDescripcion(), t.getEstado(), t.getFechaCreacion());
+    }
 }
