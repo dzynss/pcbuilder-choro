@@ -1,0 +1,136 @@
+╔══════════════════════════════════════════════════════════════╗
+║             PC BUILDER - CONEXIONES DE API                  ║
+╚══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SWAGGER UI (acceso directo a cada microservicio)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Usuarios:       http://localhost:8083/swagger-ui.html
+Resenas:        http://localhost:8084/swagger-ui.html
+Componentes:    http://localhost:8085/swagger-ui.html
+Login:          http://localhost:8086/swagger-ui.html
+Cotizaciones:   http://localhost:8087/swagger-ui.html
+Inventario:     http://localhost:9090/swagger-ui.html
+Ofertas:        http://localhost:9091/swagger-ui.html
+Soporte:        http://localhost:9092/swagger-ui.html
+Despachos:      http://localhost:9093/swagger-ui.html
+Notificaciones: http://localhost:9094/swagger-ui.html
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  POSTMAN - ACCESO DIRECTO (puerto individual de cada servicio)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- Usuarios (8083) ---
+GET     http://localhost:8083/api/usuarios/
+GET     http://localhost:8083/api/usuarios/1
+POST    http://localhost:8083/api/usuarios/
+PUT     http://localhost:8083/api/usuarios/1
+DELETE  http://localhost:8083/api/usuarios/1
+
+--- Resenas (8084) ---
+GET     http://localhost:8084/api/resenas/
+GET     http://localhost:8084/api/resenas/1
+POST    http://localhost:8084/api/resenas/
+PUT     http://localhost:8084/api/resenas/1
+DELETE  http://localhost:8084/api/resenas/1
+
+--- Componentes (8085) ---
+GET     http://localhost:8085/api/componentes/
+GET     http://localhost:8085/api/componentes/1
+POST    http://localhost:8085/api/componentes/
+PUT     http://localhost:8085/api/componentes/1
+DELETE  http://localhost:8085/api/componentes/1
+
+--- Login/Auth (8086) ---
+POST    http://localhost:8086/api/auth/login
+POST    http://localhost:8086/api/auth/registro
+
+--- Cotizaciones (8087) ---
+GET     http://localhost:8087/api/cotizaciones/
+GET     http://localhost:8087/api/cotizaciones/1
+POST    http://localhost:8087/api/cotizaciones/
+
+--- Inventario (9090) ---
+GET     http://localhost:9090/api/inventario/
+GET     http://localhost:9090/api/inventario/1
+POST    http://localhost:9090/api/inventario/
+
+--- Ofertas (9091) ---
+GET     http://localhost:9091/api/ofertas/
+GET     http://localhost:9091/api/ofertas/1
+POST    http://localhost:9091/api/ofertas/
+
+--- Soporte (9092) ---
+GET     http://localhost:9092/api/soporte/
+GET     http://localhost:9092/api/soporte/1
+POST    http://localhost:9092/api/soporte/
+
+--- Despachos (9093) ---
+GET     http://localhost:9093/api/despachos/
+GET     http://localhost:9093/api/despachos/1
+POST    http://localhost:9093/api/despachos/
+
+--- Notificaciones (9094) ---
+GET     http://localhost:9094/api/notificaciones/
+GET     http://localhost:9094/api/notificaciones/1
+POST    http://localhost:9094/api/notificaciones/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  POSTMAN - A TRAVES DEL GATEWAY (puerto 9099)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- Usuarios ---
+GET     http://localhost:9099/api/usuarios/
+GET     http://localhost:9099/api/usuarios/1
+POST    http://localhost:9099/api/usuarios/
+PUT     http://localhost:9099/api/usuarios/1
+DELETE  http://localhost:9099/api/usuarios/1
+
+--- Resenas ---
+GET     http://localhost:9099/api/resenas/
+GET     http://localhost:9099/api/resenas/1
+POST    http://localhost:9099/api/resenas/
+PUT     http://localhost:9099/api/resenas/1
+DELETE  http://localhost:9099/api/resenas/1
+
+--- Componentes ---
+GET     http://localhost:9099/api/componentes/
+GET     http://localhost:9099/api/componentes/1
+POST    http://localhost:9099/api/componentes/
+PUT     http://localhost:9099/api/componentes/1
+DELETE  http://localhost:9099/api/componentes/1
+
+--- Auth/Login ---
+POST    http://localhost:9099/api/auth/login
+POST    http://localhost:9099/api/auth/registro
+
+--- Cotizaciones ---
+GET     http://localhost:9099/api/cotizaciones/
+GET     http://localhost:9099/api/cotizaciones/1
+POST    http://localhost:9099/api/cotizaciones/
+
+--- Inventario ---
+GET     http://localhost:9099/api/inventario/
+GET     http://localhost:9099/api/inventario/1
+POST    http://localhost:9099/api/inventario/
+
+--- Ofertas ---
+GET     http://localhost:9099/api/ofertas/
+GET     http://localhost:9099/api/ofertas/1
+POST    http://localhost:9099/api/ofertas/
+
+--- Soporte ---
+GET     http://localhost:9099/api/soporte/
+GET     http://localhost:9099/api/soporte/1
+POST    http://localhost:9099/api/soporte/
+
+--- Despachos ---
+GET     http://localhost:9099/api/despachos/
+GET     http://localhost:9099/api/despachos/1
+POST    http://localhost:9099/api/despachos/
+
+--- Notificaciones ---
+GET     http://localhost:9099/api/notificaciones/
+GET     http://localhost:9099/api/notificaciones/1
+POST    http://localhost:9099/api/notificaciones/
