@@ -160,7 +160,7 @@ services:
 
   ms-gateway:
     build: ./ms-gateway
-    ports: ["8080:8080"]
+    ports: ["9099:9099"]
     depends_on:
       - ms-usuarios
       - ms-resenas
