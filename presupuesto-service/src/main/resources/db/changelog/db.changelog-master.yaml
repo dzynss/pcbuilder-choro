@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: crear-tabla-presupuestos
+      author: equipo-pcbuilder
+      changes:
+        - createTable:
+            tableName: presupuestos
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: total_aprobado
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_gastado
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha_registro
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estado
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: poblar-presupuestos-inicial
+      author: equipo-pcbuilder
+      changes:
+        - insert:
+            tableName: presupuestos
+            columns:
+              - column: { name: total_aprobado, valueNumeric: 100000 }
+              - column: { name: total_gastado, valueNumeric: 25000 }
+              - column: { name: fecha_registro, valueDate: "2026-06-21T09:00:00" }
+              - column: { name: estado, value: "APROBADO" }
+        - insert:
+            tableName: presupuestos
+            columns:
+              - column: { name: total_aprobado, valueNumeric: 200000 }
+              - column: { name: total_gastado, valueNumeric: 15000 }
+              - column: { name: fecha_registro, valueDate: "2026-06-21T10:15:00" }
+              - column: { name: estado, value: "PENDIENTE" }
+        - insert:
+            tableName: presupuestos
+            columns:
+              - column: { name: total_aprobado, valueNumeric: 150000 }
+              - column: { name: total_gastado, valueNumeric: 150000 }
+              - column: { name: fecha_registro, valueDate: "2026-06-21T11:30:00" }
+              - column: { name: estado, value: "CERRADO" }
+        - insert:
+            tableName: presupuestos
+            columns:
+              - column: { name: total_aprobado, valueNumeric: 50000 }
+              - column: { name: total_gastado, valueNumeric: 10000 }
+              - column: { name: fecha_registro, valueDate: "2026-06-21T12:45:00" }
+              - column: { name: estado, value: "EN_PROCESO" }
+        - insert:
+            tableName: presupuestos
+            columns:
+              - column: { name: total_aprobado, valueNumeric: 300000 }
+              - column: { name: total_gastado, valueNumeric: 0 }
+              - column: { name: fecha_registro, valueDate: "2026-06-21T13:50:00" }
+              - column: { name: estado, value: "APROBADO" }

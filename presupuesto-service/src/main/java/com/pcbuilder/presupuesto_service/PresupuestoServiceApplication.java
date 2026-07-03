@@ -1,4 +1,4 @@
-package com.example.presupuesto_service;
+package com.pcbuilder.presupuesto_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

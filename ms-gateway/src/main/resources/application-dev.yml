@@ -47,6 +47,10 @@ spring:
               uri: ${MS_NOTIFICACIONES_URL:http://localhost:9094}
               predicates:
                 - Path=/api/notificaciones/**,/api/notificaciones
+            - id: presupuesto-service
+              uri: ${MS_PRESUPUESTO_URL:http://localhost:9095}
+              predicates:
+                - Path=/api/presupuestos/**,/api/presupuestos
 
 logging:
   level:
