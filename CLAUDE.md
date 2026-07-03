@@ -22,9 +22,9 @@ Naming inconsistency to be aware of: some module folders use hyphens (`ms-usuari
 | `ms-soporte` | soporte (support tickets) | 9092 | ms-usuarios, ms-componentes |
 | `ms_despachos` | despachos (shipping/tracking) | 9093 | ms-usuarios |
 | `ms_notificaciones` | notificaciones (email/SMS) | 9094 | ms-usuarios |
-| `ms-gateway` | Spring Cloud Gateway, single entry point | 8080 (docker) / **9099 in `application-dev.yml`** | routes to all of the above |
+| `ms-gateway` | Spring Cloud Gateway, single entry point | 9099 | routes to all of the above |
 
-All external traffic goes through the gateway, path-routed by prefix (`/api/usuarios/**`, `/api/resenas/**`, `/api/componentes/**`, `/api/auth/**`, `/api/cotizaciones/**`, `/api/inventario/**`, `/api/ofertas/**`, `/api/soporte/**`, `/api/despachos/**`, `/api/notificaciones/**`) — see `ms-gateway/src/main/resources/application-dev.yml`. Note the gateway's dev profile sets `server.port: 9099` while `docker-compose.yml` maps `8080:8080` for it — check which one is actually active before assuming a port.
+All external traffic goes through the gateway, path-routed by prefix (`/api/usuarios/**`, `/api/resenas/**`, `/api/componentes/**`, `/api/auth/**`, `/api/cotizaciones/**`, `/api/inventario/**`, `/api/ofertas/**`, `/api/soporte/**`, `/api/despachos/**`, `/api/notificaciones/**`) — see `ms-gateway/src/main/resources/application-dev.yml`. `docker-compose.yml` maps `9099:9099` for it, matching the dev profile's `server.port: 9099`.
 
 Each downstream service exposes Swagger UI at `http://localhost:<port>/swagger-ui.html`.
 
@@ -79,7 +79,7 @@ Tests live under `src/test/java/com/pcbuilder/<pkg>/`, using JUnit 5 + Mockito +
 
 ### Auth
 
-`ms_login` validates credentials against `ms-usuarios` (it has no user table of its own — only a `HistorialLogin` table logging attempts) and issues a JWT (`JwtUtil`, HS256, 1h expiry, key generated in-memory at startup so tokens don't survive a restart). **No other service currently validates this JWT** — there is no security filter on the other microservices' endpoints. Treat the system as unauthenticated end-to-end unless/until that's added; don't assume `/api/**` routes are actually protected just because a login/token flow exists.
+`ms_login` validates credentials against `ms-usuarios` (it has no user table of its own — only a `HistorialLogin` table logging attempts) and issues a JWT (`JwtUtil`, HS256, 1h expiry, key derived from the `jwt.secret` property so it's stable across restarts and shared across instances). **No other service currently validates this JWT** — there is no security filter on the other microservices' endpoints. Treat the system as unauthenticated end-to-end unless/until that's added; don't assume `/api/**` routes are actually protected just because a login/token flow exists.
 
 ## Stack
 

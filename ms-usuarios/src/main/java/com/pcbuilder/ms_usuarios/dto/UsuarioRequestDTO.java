@@ -15,7 +15,6 @@ public record UsuarioRequestDTO(
         @Email(message = "Ese correo no tiene un formato válido")
         String correo,
 
-        @NotBlank(message = "La contraseña no puede ir vacía")
         @Size(min = 4, max = 100, message = "La contraseña debe tener entre 4 y 100 caracteres")
         String password,
 

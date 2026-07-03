@@ -6,6 +6,7 @@ import com.pcbuilder.ms_login.dto.LoginRequestDTO;
 import com.pcbuilder.ms_login.dto.TokenResponseDTO;
 import com.pcbuilder.ms_login.entity.HistorialLogin;
 import com.pcbuilder.ms_login.exception.CredencialesInvalidasException;
+import com.pcbuilder.ms_login.exception.ErrorComunicacionException;
 import com.pcbuilder.ms_login.repository.HistorialRepository;
 import com.pcbuilder.ms_login.util.JwtUtil;
 import feign.FeignException;
@@ -33,7 +34,11 @@ public class AuthService {
         } catch (FeignException.Unauthorized | FeignException.NotFound e) {
             historial.setEstado("FALLIDO");
             repo.save(historial);
-            throw new CredencialesInvalidasException("Correo o clave incorrectos, o el servicio de usuarios no está disponible.");
+            throw new CredencialesInvalidasException("Correo o clave incorrectos.");
+        } catch (FeignException e) {
+            historial.setEstado("FALLIDO");
+            repo.save(historial);
+            throw new ErrorComunicacionException("ms-usuarios no respondió correctamente: " + e.getMessage());
         }
 
         String token = jwtUtil.generarToken(credenciales.correo());

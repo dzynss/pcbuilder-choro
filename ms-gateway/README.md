@@ -28,7 +28,7 @@ Enrutar cada petición entrante hacia el microservicio correspondiente según el
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
-Puerto: `8080`. Requiere que los 10 microservicios estén corriendo en sus puertos por defecto.
+Puerto: `9099`. Requiere que los 10 microservicios estén corriendo en sus puertos por defecto.
 
 ## Ejecución con Docker
 ```bash

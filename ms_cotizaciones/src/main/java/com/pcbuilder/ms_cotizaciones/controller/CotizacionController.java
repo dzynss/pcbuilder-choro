@@ -76,14 +76,14 @@ public class CotizacionController {
     @Operation(summary = "Actualiza una cotización existente")
     @PutMapping("/{id}")
     public ResponseEntity<CotizacionResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody CotizacionRequestDTO dto) {
-        log.warn("Actualizando la cotización ID: {}", id);
+        log.info("Actualizando la cotización ID: {}", id);
         return ResponseEntity.ok(service.actualizar(id, dto));
     }
 
     @Operation(summary = "Elimina una cotización")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> borrar(@PathVariable Long id) {
-        log.error("Eliminando la cotización ID: {}", id);
+        log.info("Eliminando la cotización ID: {}", id);
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }

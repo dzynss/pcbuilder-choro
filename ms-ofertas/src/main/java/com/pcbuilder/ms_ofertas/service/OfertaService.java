@@ -38,7 +38,9 @@ public class OfertaService {
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("El cupón con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

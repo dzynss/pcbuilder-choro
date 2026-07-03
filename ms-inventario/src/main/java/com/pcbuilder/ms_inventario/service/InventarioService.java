@@ -33,7 +33,9 @@ public class InventarioService {
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("El registro de inventario con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

@@ -47,7 +47,9 @@ public class ResenaService {
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("La reseña con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

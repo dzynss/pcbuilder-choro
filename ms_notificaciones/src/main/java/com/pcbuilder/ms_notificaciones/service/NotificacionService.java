@@ -43,7 +43,9 @@ public class NotificacionService {
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("La notificación con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

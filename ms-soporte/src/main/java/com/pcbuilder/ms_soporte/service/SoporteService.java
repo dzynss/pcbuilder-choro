@@ -6,6 +6,7 @@ import com.pcbuilder.ms_soporte.dto.TicketRequestDTO;
 import com.pcbuilder.ms_soporte.dto.TicketResponseDTO;
 import com.pcbuilder.ms_soporte.entity.TicketSoporte;
 import com.pcbuilder.ms_soporte.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_soporte.exception.EstadoInvalidoException;
 import com.pcbuilder.ms_soporte.exception.RecursoNoEncontradoException;
 import com.pcbuilder.ms_soporte.repository.TicketRepository;
 import feign.FeignException;
@@ -47,12 +48,17 @@ public class SoporteService {
 
     public TicketResponseDTO cerrarTicket(Long id) {
         TicketSoporte ticket = buscarEntidadPorId(id);
+        if ("CERRADO".equals(ticket.getEstado())) {
+            throw new EstadoInvalidoException("El ticket " + id + " ya está cerrado.");
+        }
         ticket.setEstado("CERRADO");
         return aResponseDTO(repo.save(ticket));
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("El ticket con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

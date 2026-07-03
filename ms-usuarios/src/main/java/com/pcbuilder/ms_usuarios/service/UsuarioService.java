@@ -6,6 +6,7 @@ import com.pcbuilder.ms_usuarios.dto.UsuarioResponseDTO;
 import com.pcbuilder.ms_usuarios.entity.Usuario;
 import com.pcbuilder.ms_usuarios.exception.CredencialesInvalidasException;
 import com.pcbuilder.ms_usuarios.exception.RecursoNoEncontradoException;
+import com.pcbuilder.ms_usuarios.exception.SolicitudInvalidaException;
 import com.pcbuilder.ms_usuarios.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO guardar(UsuarioRequestDTO dto) {
+        if (dto.password() == null || dto.password().isBlank()) {
+            throw new SolicitudInvalidaException("La contraseña es obligatoria al crear un usuario.");
+        }
         Usuario u = new Usuario();
         u.setNombre(dto.nombre());
         u.setCorreo(dto.correo());
@@ -39,13 +43,17 @@ public class UsuarioService {
         Usuario existente = buscarEntidadPorId(id);
         existente.setNombre(dto.nombre());
         existente.setCorreo(dto.correo());
-        existente.setPassword(dto.password());
+        if (dto.password() != null && !dto.password().isBlank()) {
+            existente.setPassword(dto.password());
+        }
         existente.setRol(dto.rol());
         return aResponseDTO(repo.save(existente));
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("El usuario con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

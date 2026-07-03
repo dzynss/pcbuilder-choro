@@ -40,7 +40,9 @@ public class ComponenteService {
     }
 
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("El componente con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

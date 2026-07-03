@@ -2,6 +2,7 @@ package com.pcbuilder.ms_soporte.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record TicketRequestDTO(
 
@@ -12,5 +13,6 @@ public record TicketRequestDTO(
         Long idComponente,
 
         @NotBlank(message = "Ponle una descripción al problema")
+        @Size(max = 255, message = "La descripción no puede tener más de 255 caracteres")
         String descripcion
 ) {}

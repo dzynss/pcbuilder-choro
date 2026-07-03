@@ -36,7 +36,9 @@ public class CotizacionService {
     }
 
     public Double calcularTotalPorUsuario(Long idUsuario) {
-        return repo.findByIdUsuario(idUsuario).stream().mapToDouble(Cotizacion::getTotal).sum();
+        return repo.findByIdUsuario(idUsuario).stream()
+                .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
+                .sum();
     }
 
     /** Valida usuario y componente en sus respectivos microservicios y calcula el total con el precio real. */
@@ -48,7 +50,7 @@ public class CotizacionService {
         c.setIdUsuario(dto.idUsuario());
         c.setIdComponente(dto.idComponente());
         c.setCantidad(dto.cantidad());
-        c.setTotal(componente.precio() * dto.cantidad());
+        c.setTotal(calcularTotal(componente, dto.cantidad()));
 
         return aResponseDTO(repo.save(c));
     }
@@ -61,13 +63,23 @@ public class CotizacionService {
         existente.setIdUsuario(dto.idUsuario());
         existente.setIdComponente(dto.idComponente());
         existente.setCantidad(dto.cantidad());
-        existente.setTotal(componente.precio() * dto.cantidad());
+        existente.setTotal(calcularTotal(componente, dto.cantidad()));
 
         return aResponseDTO(repo.save(existente));
     }
 
+    private double calcularTotal(ComponenteResponseDTO componente, Integer cantidad) {
+        if (componente.precio() == null) {
+            throw new ErrorComunicacionException(
+                    "ms-componentes devolvió un precio inválido para el componente " + componente.id());
+        }
+        return componente.precio() * cantidad;
+    }
+
     public void eliminar(Long id) {
-        buscarEntidadPorId(id);
+        if (!repo.existsById(id)) {
+            throw new RecursoNoEncontradoException("La cotización con ID " + id + " no existe.");
+        }
         repo.deleteById(id);
     }
 

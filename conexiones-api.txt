@@ -14,7 +14,8 @@ http://localhost:8083/api/usuarios
 http://localhost:8084/api/resenas
 http://localhost:8085/api/componentes
 POST    http://localhost:8086/api/auth/login
-POST    http://localhost:8086/api/auth/registro
+GET     http://localhost:8086/api/auth/historial
+(el alta de usuarios es POST http://localhost:8083/api/usuarios, no existe /api/auth/registro)
 http://localhost:8087/api/cotizaciones
 http://localhost:9090/api/inventario
 http://localhost:9091/api/ofertas

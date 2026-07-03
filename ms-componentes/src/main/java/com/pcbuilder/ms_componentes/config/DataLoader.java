@@ -26,7 +26,8 @@ public class DataLoader implements CommandLineRunner {
             return;
         }
 
-        Categoria cpu = categoriaRepo.findById(2L).orElseThrow();
+        Categoria cpu = categoriaRepo.findByNombre("CPU")
+                .orElseThrow(() -> new IllegalStateException("La categoría 'CPU' no existe en la base de datos."));
 
         componenteRepo.save(crearComponente("Ryzen 7 7800X3D", "AMD", 450000.0, 5, cpu));
         componenteRepo.save(crearComponente("Core i7 14700K", "Intel", 480000.0, 7, cpu));

@@ -45,3 +45,20 @@ databaseChangeLog:
               - column: { name: codigo, value: "PROFECARLOS" }
               - column: { name: porcentaje_descuento, valueNumeric: 50 }
               - column: { name: activa, valueBoolean: true }
+
+  - changeSet:
+      id: fix-tipo-columna-activa
+      author: equipo-pcbuilder
+      comment: >
+        Liquibase mapea "type: boolean" a TINYINT(1) en MySQL, pero Hibernate valida
+        columnas boolean contra BIT en este dialecto. Sin este fix, ms-ofertas no
+        levanta (SchemaManagementException en el arranque).
+      changes:
+        - modifyDataType:
+            tableName: ofertas
+            columnName: activa
+            newDataType: BIT(1)
+        - addNotNullConstraint:
+            tableName: ofertas
+            columnName: activa
+            columnDataType: BIT(1)
