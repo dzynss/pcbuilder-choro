@@ -1,0 +1,54 @@
+server:
+  port: 9099
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        # --- Lote 1 (8083-8087) ---
+        - id: ms-usuarios
+          uri: ${MS_USUARIOS_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/usuarios/**,/api/usuarios
+        - id: ms-resenas
+          uri: ${MS_RESENAS_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/resenas/**,/api/resenas
+        - id: ms-componentes
+          uri: ${MS_COMPONENTES_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/componentes/**,/api/componentes
+        - id: ms-login
+          uri: ${MS_LOGIN_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/auth/**,/api/auth
+        - id: ms-cotizaciones
+          uri: ${MS_COTIZACIONES_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/cotizaciones/**,/api/cotizaciones
+
+        # --- Lote 2 (9090-9094) ---
+        - id: ms-inventario
+          uri: ${MS_INVENTARIO_URL:http://localhost:9090}
+          predicates:
+            - Path=/api/inventario/**,/api/inventario
+        - id: ms-ofertas
+          uri: ${MS_OFERTAS_URL:http://localhost:9091}
+          predicates:
+            - Path=/api/ofertas/**,/api/ofertas
+        - id: ms-soporte
+          uri: ${MS_SOPORTE_URL:http://localhost:9092}
+          predicates:
+            - Path=/api/soporte/**,/api/soporte
+        - id: ms-despachos
+          uri: ${MS_DESPACHOS_URL:http://localhost:9093}
+          predicates:
+            - Path=/api/despachos/**,/api/despachos
+        - id: ms-notificaciones
+          uri: ${MS_NOTIFICACIONES_URL:http://localhost:9094}
+          predicates:
+            - Path=/api/notificaciones/**,/api/notificaciones
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
