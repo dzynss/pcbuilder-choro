@@ -5,7 +5,6 @@ spring:
   cloud:
     gateway:
       routes:
-        # --- Lote 1 (8083-8087) ---
         - id: ms-usuarios
           uri: ${MS_USUARIOS_URL:http://localhost:8083}
           predicates:
@@ -26,8 +25,6 @@ spring:
           uri: ${MS_COTIZACIONES_URL:http://localhost:8087}
           predicates:
             - Path=/api/cotizaciones/**,/api/cotizaciones
-
-        # --- Lote 2 (9090-9094) ---
         - id: ms-inventario
           uri: ${MS_INVENTARIO_URL:http://localhost:9090}
           predicates:
@@ -52,3 +49,4 @@ spring:
 logging:
   level:
     org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: DEBUG
