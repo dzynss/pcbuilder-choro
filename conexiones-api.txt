@@ -24,3 +24,6 @@ http://localhost:9093/api/despachos
 GATEWAY
 lo mismo pero con el puerto de 9099 (si es que funciona)
 http://localhost:9099/api/usuarios
+
+
+me quiero pegar un tiro
