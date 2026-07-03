@@ -14,7 +14,7 @@
 	<name>ms_login</name>
 	<description>Microservicio de Auth y JWT</description>
 	<properties>
-		<java.version>24</java.version>
+		<java.version>17</java.version>
 		<spring-cloud.version>2025.1.1</spring-cloud.version>
 	</properties>
 	<dependencies>
