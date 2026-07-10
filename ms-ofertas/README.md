@@ -5,12 +5,12 @@ Microservicio del sistema **PC Builder**. Administra cupones de descuento y perm
 
 ## Integrantes
 - Martín Narváez — implementación de ms-usuarios, ms-componentes, ms-resenas, ms_cotizaciones, ms_login
-- [Nombre de tu compañero] — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
+- Martin — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
 
 ## Responsabilidad
 CRUD de cupones (código + % de descuento) y regla de negocio de aplicación de descuento sobre un monto base.
 
-## Rutas principales (vía Gateway en :8080)
+## Rutas principales (vía Gateway en :9099)
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | /api/ofertas | Lista todos los cupones |

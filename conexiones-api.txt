@@ -26,5 +26,6 @@ GATEWAY
 lo mismo pero con el puerto de 9099 (si es que funciona)
 http://localhost:9099/api/usuarios
 
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
 me quiero pegar un tiro

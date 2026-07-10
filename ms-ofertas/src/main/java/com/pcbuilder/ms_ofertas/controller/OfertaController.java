@@ -66,6 +66,18 @@ public class OfertaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
+    @Operation(summary = "Actualiza el porcentaje de descuento de un cupón existente")
+    @PutMapping("/{id}")
+    public ResponseEntity<EntityModel<OfertaResponseDTO>> actualizar(@PathVariable Long id,
+                                                                      @Valid @RequestBody OfertaRequestDTO dto) {
+        log.info("Actualizando la oferta con ID: {}", id);
+        OfertaResponseDTO oferta = service.actualizar(id, dto);
+        EntityModel<OfertaResponseDTO> recurso = EntityModel.of(oferta,
+                linkTo(methodOn(OfertaController.class).buscarPorId(id)).withSelfRel(),
+                linkTo(methodOn(OfertaController.class).listarTodas()).withRel("volver-a-ofertas"));
+        return ResponseEntity.ok(recurso);
+    }
+
     @Operation(summary = "Borra un cupón que ya venció")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

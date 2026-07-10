@@ -17,3 +17,6 @@ ms:
     url: ${MS_USUARIOS_URL:http://localhost:8083}
   componentes:
     url: ${MS_COMPONENTES_URL:http://localhost:8085}
+
+jwt:
+  secret: ${JWT_SECRET:pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026}

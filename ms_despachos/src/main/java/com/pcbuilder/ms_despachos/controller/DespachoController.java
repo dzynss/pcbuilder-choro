@@ -63,6 +63,18 @@ public class DespachoController {
         return ResponseEntity.ok(service.actualizarEstado(id, estado));
     }
 
+    @Operation(summary = "Edita la dirección de envío o la empresa de transporte de la encomienda")
+    @PutMapping("/{id}")
+    public ResponseEntity<EntityModel<DespachoResponseDTO>> actualizar(@PathVariable Long id,
+                                                                        @Valid @RequestBody DespachoRequestDTO dto) {
+        log.info("Actualizando el despacho ID: {}", id);
+        DespachoResponseDTO envio = service.actualizar(id, dto);
+        EntityModel<DespachoResponseDTO> recurso = EntityModel.of(envio,
+                linkTo(methodOn(DespachoController.class).buscarPorId(id)).withSelfRel(),
+                linkTo(methodOn(DespachoController.class).listarTodos()).withRel("volver-a-despachos"));
+        return ResponseEntity.ok(recurso);
+    }
+
     @Operation(summary = "Cancela el envío y borra el registro")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

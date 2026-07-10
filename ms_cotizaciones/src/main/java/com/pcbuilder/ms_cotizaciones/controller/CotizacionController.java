@@ -40,9 +40,12 @@ public class CotizacionController {
 
     @Operation(summary = "Calcula el total gastado por un usuario en todas sus cotizaciones")
     @GetMapping("/usuario/{idUsuario}/total")
-    public ResponseEntity<Double> totalPorUsuario(@PathVariable Long idUsuario) {
+    public ResponseEntity<EntityModel<Double>> totalPorUsuario(@PathVariable Long idUsuario) {
         log.info("Calculando el total gastado por el usuario ID: {}", idUsuario);
-        return ResponseEntity.ok(service.calcularTotalPorUsuario(idUsuario));
+        EntityModel<Double> recurso = EntityModel.of(service.calcularTotalPorUsuario(idUsuario),
+                linkTo(methodOn(CotizacionController.class).totalPorUsuario(idUsuario)).withSelfRel(),
+                linkTo(methodOn(CotizacionController.class).buscarPorUsuario(idUsuario)).withRel("cotizaciones-del-usuario"));
+        return ResponseEntity.ok(recurso);
     }
 
     @Operation(summary = "Lista todas las cotizaciones")

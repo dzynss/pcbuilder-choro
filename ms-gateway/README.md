@@ -5,7 +5,7 @@ API Gateway centralizado del sistema **PC Builder**, construido con Spring Cloud
 
 ## Integrantes
 - Martín Narváez — implementación de ms-usuarios, ms-componentes, ms-resenas, ms_cotizaciones, ms_login
-- [Nombre de tu compañero] — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
+- Martin — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
 
 ## Responsabilidad
 Enrutar cada petición entrante hacia el microservicio correspondiente según el path, sin lógica de negocio propia.

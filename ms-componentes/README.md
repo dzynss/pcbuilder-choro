@@ -5,12 +5,12 @@ Microservicio del sistema **PC Builder**. Mantiene el catálogo de piezas (compo
 
 ## Integrantes
 - Martín Narváez — implementación de ms-usuarios, ms-componentes, ms-resenas, ms_cotizaciones, ms_login
-- [Nombre de tu compañero] — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
+- Martin — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
 
 ## Responsabilidad
 CRUD del catálogo de componentes y categorías. Es consumido por `ms-resenas`, `ms_cotizaciones` y `ms-soporte` para validar que una pieza exista y obtener su precio.
 
-## Rutas principales (vía Gateway en :8080)
+## Rutas principales (vía Gateway en :9099)
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | /api/componentes | Lista todos los componentes |

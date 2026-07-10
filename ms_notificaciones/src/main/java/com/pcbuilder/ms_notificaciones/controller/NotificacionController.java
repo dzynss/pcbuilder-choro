@@ -56,6 +56,18 @@ public class NotificacionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
+    @Operation(summary = "Edita el tipo de mensaje o el contenido de una notificación")
+    @PutMapping("/{id}")
+    public ResponseEntity<EntityModel<NotificacionResponseDTO>> actualizar(@PathVariable Long id,
+                                                                            @Valid @RequestBody NotificacionRequestDTO dto) {
+        log.info("Actualizando la notificación ID: {}", id);
+        NotificacionResponseDTO noti = service.actualizar(id, dto);
+        EntityModel<NotificacionResponseDTO> recurso = EntityModel.of(noti,
+                linkTo(methodOn(NotificacionController.class).buscarPorId(id)).withSelfRel(),
+                linkTo(methodOn(NotificacionController.class).listarTodas()).withRel("volver-a-bandeja"));
+        return ResponseEntity.ok(recurso);
+    }
+
     @Operation(summary = "Borra un mensaje del registro")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

@@ -63,6 +63,18 @@ public class SoporteController {
         return ResponseEntity.ok(service.cerrarTicket(id));
     }
 
+    @Operation(summary = "Edita los datos del ticket (descripción, usuario o componente asociado)")
+    @PutMapping("/{id}")
+    public ResponseEntity<EntityModel<TicketResponseDTO>> actualizar(@PathVariable Long id,
+                                                                      @Valid @RequestBody TicketRequestDTO dto) {
+        log.info("Actualizando el ticket ID: {}", id);
+        TicketResponseDTO ticket = service.actualizar(id, dto);
+        EntityModel<TicketResponseDTO> recurso = EntityModel.of(ticket,
+                linkTo(methodOn(SoporteController.class).buscarPorId(id)).withSelfRel(),
+                linkTo(methodOn(SoporteController.class).listarTodos()).withRel("volver-a-tickets"));
+        return ResponseEntity.ok(recurso);
+    }
+
     @Operation(summary = "Borra el ticket del sistema")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

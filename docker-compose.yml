@@ -5,7 +5,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "9999:9999"
+      - "9999:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
@@ -25,6 +25,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
 
   ms-resenas:
     build: ./ms-resenas
@@ -39,6 +40,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
       MS_COMPONENTES_URL: http://ms-componentes:8085
 
   ms-componentes:
@@ -52,6 +54,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
 
   ms-login:
     build: ./ms_login
@@ -66,6 +69,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
       MS_USUARIOS_URL: http://ms-usuarios:8083
 
   ms-cotizaciones:
@@ -83,6 +87,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
       MS_USUARIOS_URL: http://ms-usuarios:8083
       MS_COMPONENTES_URL: http://ms-componentes:8085
 
@@ -97,6 +102,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
 
   ms-ofertas:
     build: ./ms-ofertas
@@ -109,6 +115,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
 
   ms-soporte:
     build: ./ms-soporte
@@ -125,6 +132,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
       MS_USUARIOS_URL: http://ms-usuarios:8083
       MS_COMPONENTES_URL: http://ms-componentes:8085
 
@@ -141,6 +149,7 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
       MS_USUARIOS_URL: http://ms-usuarios:8083
 
   ms-notificaciones:
@@ -156,19 +165,8 @@ services:
       DB_HOST: mysql
       DB_USERNAME: root
       DB_PASSWORD: root
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
       MS_USUARIOS_URL: http://ms-usuarios:8083
-
-  presupuesto-service:
-    build: ./presupuesto-service
-    ports: ["9095:9095"]
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DB_HOST: mysql
-      DB_USERNAME: root
-      DB_PASSWORD: root
 
   ms-gateway:
     build: ./ms-gateway
@@ -184,7 +182,6 @@ services:
       - ms-soporte
       - ms-despachos
       - ms-notificaciones
-      - presupuesto-service
     environment:
       SPRING_PROFILES_ACTIVE: dev
       MS_USUARIOS_URL: http://ms-usuarios:8083
@@ -197,7 +194,7 @@ services:
       MS_SOPORTE_URL: http://ms-soporte:9092
       MS_DESPACHOS_URL: http://ms-despachos:9093
       MS_NOTIFICACIONES_URL: http://ms-notificaciones:9094
-      MS_PRESUPUESTO_URL: http://presupuesto-service:9095
+      JWT_SECRET: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
 
 volumes:
   pcbuilder-mysql-data:

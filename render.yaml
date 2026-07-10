@@ -1,0 +1,258 @@
+# Render Blueprint — despliegue de los 11 microservicios de PC Builder.
+# Uso: en Render, "New +" -> "Blueprint" -> conectar este repo -> Render detecta este archivo.
+#
+# Notas importantes (léelas antes de desplegar):
+# 1. Render no ofrece MySQL administrado. Este blueprint despliega un mysql:8.0 como
+#    "private service" con disco persistente (requiere un plan pago para el disco).
+#    Alternativa gratuita: usa un MySQL externo (PlanetScale, Railway, Aiven, etc.) y
+#    reemplaza el valor de DB_HOST/DB_USERNAME/DB_PASSWORD de cada servicio.
+# 2. Los 10 microservicios de negocio quedan como "private services" (solo accesibles
+#    dentro de la red interna de Render, en http://<nombre>:<puerto>) — igual que en
+#    docker-compose, donde solo el gateway está expuesto públicamente.
+# 3. ms-gateway es el único "web service" (público). Ajusta CORS si conectas un frontend.
+# 4. JWT_SECRET debe ser IDÉNTICO en los 11 servicios (ya viene fijado abajo con el mismo
+#    valor por defecto que usa el proyecto en local; cámbialo por uno propio en producción
+#    editando la variable en el dashboard de Render, en los 11 servicios a la vez).
+
+services:
+  - type: pserv
+    name: mysql
+    runtime: image
+    image:
+      url: docker.io/library/mysql:8.0
+    plan: starter
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: root
+
+  - type: pserv
+    name: ms-usuarios
+    runtime: docker
+    dockerfilePath: ./ms-usuarios/Dockerfile
+    dockerContext: ./ms-usuarios
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-componentes
+    runtime: docker
+    dockerfilePath: ./ms-componentes/Dockerfile
+    dockerContext: ./ms-componentes
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-resenas
+    runtime: docker
+    dockerfilePath: ./ms-resenas/Dockerfile
+    dockerContext: ./ms-resenas
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: MS_COMPONENTES_URL
+        value: http://ms-componentes:8085
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-login
+    runtime: docker
+    dockerfilePath: ./ms_login/Dockerfile
+    dockerContext: ./ms_login
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: MS_USUARIOS_URL
+        value: http://ms-usuarios:8083
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-cotizaciones
+    runtime: docker
+    dockerfilePath: ./ms_cotizaciones/Dockerfile
+    dockerContext: ./ms_cotizaciones
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: MS_USUARIOS_URL
+        value: http://ms-usuarios:8083
+      - key: MS_COMPONENTES_URL
+        value: http://ms-componentes:8085
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-inventario
+    runtime: docker
+    dockerfilePath: ./ms-inventario/Dockerfile
+    dockerContext: ./ms-inventario
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-ofertas
+    runtime: docker
+    dockerfilePath: ./ms-ofertas/Dockerfile
+    dockerContext: ./ms-ofertas
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-soporte
+    runtime: docker
+    dockerfilePath: ./ms-soporte/Dockerfile
+    dockerContext: ./ms-soporte
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: MS_USUARIOS_URL
+        value: http://ms-usuarios:8083
+      - key: MS_COMPONENTES_URL
+        value: http://ms-componentes:8085
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-despachos
+    runtime: docker
+    dockerfilePath: ./ms_despachos/Dockerfile
+    dockerContext: ./ms_despachos
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: MS_USUARIOS_URL
+        value: http://ms-usuarios:8083
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: pserv
+    name: ms-notificaciones
+    runtime: docker
+    dockerfilePath: ./ms_notificaciones/Dockerfile
+    dockerContext: ./ms_notificaciones
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: DB_HOST
+        value: mysql
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: root
+      - key: MS_USUARIOS_URL
+        value: http://ms-usuarios:8083
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026
+
+  - type: web
+    name: ms-gateway
+    runtime: docker
+    dockerfilePath: ./ms-gateway/Dockerfile
+    dockerContext: ./ms-gateway
+    plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: MS_USUARIOS_URL
+        value: http://ms-usuarios:8083
+      - key: MS_RESENAS_URL
+        value: http://ms-resenas:8084
+      - key: MS_COMPONENTES_URL
+        value: http://ms-componentes:8085
+      - key: MS_LOGIN_URL
+        value: http://ms-login:8086
+      - key: MS_COTIZACIONES_URL
+        value: http://ms-cotizaciones:8087
+      - key: MS_INVENTARIO_URL
+        value: http://ms-inventario:9090
+      - key: MS_OFERTAS_URL
+        value: http://ms-ofertas:9091
+      - key: MS_SOPORTE_URL
+        value: http://ms-soporte:9092
+      - key: MS_DESPACHOS_URL
+        value: http://ms-despachos:9093
+      - key: MS_NOTIFICACIONES_URL
+        value: http://ms-notificaciones:9094
+      - key: JWT_SECRET
+        value: pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026

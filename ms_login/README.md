@@ -5,14 +5,14 @@ Microservicio del sistema **PC Builder**. Centraliza el login: valida credencial
 
 ## Integrantes
 - Martín Narváez — implementación de ms-usuarios, ms-componentes, ms-resenas, ms_cotizaciones, ms_login
-- [Nombre de tu compañero] — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
+- Martin — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
 
 ## Responsabilidad
 Login y emisión de JWT. No tiene su propia tabla de usuarios: delega la validación de correo/password a `ms-usuarios` vía Feign Client y solo guarda el historial de intentos.
 
 > Nota: actualmente el JWT se genera pero ningún otro microservicio lo valida (no hay filtro de seguridad en los demás servicios). Es un punto pendiente si se quiere optar al ítem opcional "JWT en todos los microservicios" de la pauta.
 
-## Rutas principales (vía Gateway en :8080)
+## Rutas principales (vía Gateway en :9099)
 | Método | Ruta | Descripción |
 |---|---|---|
 | POST | /api/auth/login | Valida credenciales en ms-usuarios y devuelve un token JWT |

@@ -15,3 +15,6 @@ spring:
 ms:
   usuarios:
     url: ${MS_USUARIOS_URL:http://localhost:8083}
+
+jwt:
+  secret: ${JWT_SECRET:pcbuilder-choro-ms-login-clave-secreta-cambiar-en-produccion-2026}

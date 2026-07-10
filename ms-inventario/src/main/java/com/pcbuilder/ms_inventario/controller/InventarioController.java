@@ -57,6 +57,18 @@ public class InventarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
+    @Operation(summary = "Actualiza el stock de un registro de inventario")
+    @PutMapping("/{id}")
+    public ResponseEntity<EntityModel<InventarioResponseDTO>> actualizar(@PathVariable Long id,
+                                                                          @Valid @RequestBody InventarioRequestDTO dto) {
+        log.info("Actualizando el registro de inventario con ID: {}", id);
+        InventarioResponseDTO inv = service.actualizar(id, dto);
+        EntityModel<InventarioResponseDTO> recurso = EntityModel.of(inv,
+                linkTo(methodOn(InventarioController.class).buscarPorId(id)).withSelfRel(),
+                linkTo(methodOn(InventarioController.class).listarTodos()).withRel("volver-al-inventario"));
+        return ResponseEntity.ok(recurso);
+    }
+
     @Operation(summary = "Borra un registro si se quemó la bodega")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

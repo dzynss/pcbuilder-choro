@@ -74,4 +74,17 @@ class OfertaServiceTest {
         assertThatThrownBy(() -> service.aplicarDescuento(ofertaInactiva, 50_000.0))
                 .isInstanceOf(IllegalStateException.class);
     }
+
+    // --- Regla de negocio: el monto base a descontar debe ser positivo ---
+    @Test
+    void aplicarDescuento_deberiaLanzarExcepcion_cuandoElMontoBaseEsCeroONegativo() {
+        // Given
+        OfertaResponseDTO oferta = new OfertaResponseDTO(1L, "PCGAMER2026", 20, true);
+
+        // When / Then
+        assertThatThrownBy(() -> service.aplicarDescuento(oferta, 0.0))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.aplicarDescuento(oferta, -10_000.0))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }
