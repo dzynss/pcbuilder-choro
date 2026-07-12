@@ -3,6 +3,9 @@
 Este documento explica, servicio por servicio y archivo por archivo, qué hace cada uno de los 11 microservicios que componen el sistema **PC Builder**. Generado a partir de una lectura completa del código fuente (controllers, services, repositories, entities, DTOs, excepciones, clientes Feign, seguridad y configuración de cada módulo).
 
 > Nota: cada `ms-*`/`ms_*` es un módulo Maven **totalmente independiente** (su propio `pom.xml`, `mvnw`, `Dockerfile`). No hay librería compartida: clases como `GlobalExceptionHandler` o `RecursoNoEncontradoException` están copiadas y adaptadas en cada servicio.
+
+## Índice
+
 1. [Visión general de la arquitectura](#visión-general-de-la-arquitectura)
 2. [ms-gateway — Punto de entrada](#ms-gateway--punto-de-entrada)
 3. [ms-usuarios — Gestión de usuarios](#ms-usuarios--gestión-de-usuarios)
