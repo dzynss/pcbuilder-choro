@@ -10,12 +10,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security del microservicio: sesión stateless, sin CSRF/form-login,
+ * permite acceso libre a Swagger/OpenAPI y exige JWT válido (vía {@link JwtAuthFilter}) para todo lo demás.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Define la cadena de filtros HTTP: rutas públicas, autenticación requerida y el filtro JWT propio. */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

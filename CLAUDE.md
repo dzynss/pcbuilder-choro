@@ -79,7 +79,9 @@ Tests live under `src/test/java/com/pcbuilder/<pkg>/`, using JUnit 5 + Mockito +
 
 ### Auth
 
-`ms_login` validates credentials against `ms-usuarios` (it has no user table of its own — only a `HistorialLogin` table logging attempts) and issues a JWT (`JwtUtil`, HS256, 1h expiry, key derived from the `jwt.secret` property so it's stable across restarts and shared across instances). **No other service currently validates this JWT** — there is no security filter on the other microservices' endpoints. Treat the system as unauthenticated end-to-end unless/until that's added; don't assume `/api/**` routes are actually protected just because a login/token flow exists.
+`ms_login` validates credentials against `ms-usuarios` (it has no user table of its own — only a `HistorialLogin` table logging attempts) and issues a JWT (`JwtUtil`, HS256, 1h expiry, key derived from the `jwt.secret` property so it's stable across restarts and shared across instances).
+
+The JWT **is** validated, in two layers: `ms-gateway` has a global reactive filter (`filter/JwtValidationGlobalFilter`, WebFlux `GlobalFilter`) that checks every request before routing, and each downstream service (`ms-usuarios`, `ms-componentes`, `ms-resenas`, `ms-soporte`, `ms_cotizaciones`, `ms_despachos`, `ms_notificaciones`, `ms-inventario`, `ms-ofertas`) independently re-validates it via its own `security/JwtAuthFilter` (a servlet `OncePerRequestFilter`) + `security/SecurityConfig` (Spring Security, stateless sessions), all deriving the same HMAC key from `jwt.secret`. Requests without a valid `Bearer` token get HTTP 401. Public (no-token) routes are Swagger/OpenAPI paths plus login (`POST /api/usuarios/login` / `/api/auth/**`) and user registration (`POST /api/usuarios`) — every other endpoint requires a valid token. `ms_login` itself has no inbound JWT filter (it's the service that issues tokens).
 
 ## Stack
 

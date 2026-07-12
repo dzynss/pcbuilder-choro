@@ -10,12 +10,18 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security del servicio: deja pública la documentación
+ * Swagger/OpenAPI y exige autenticación (vía JWT) para el resto de endpoints,
+ * registrando {@link JwtAuthFilter} antes del filtro estándar de usuario/contraseña.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Define la cadena de filtros HTTP: sin CSRF, sesión stateless, Swagger público, resto autenticado, y responde 401 si falta/es inválido el JWT. */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

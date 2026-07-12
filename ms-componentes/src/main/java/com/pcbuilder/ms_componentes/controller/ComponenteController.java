@@ -18,6 +18,13 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controller REST del catálogo de componentes (piezas de PC), expuesto en
+ * /api/componentes y enrutado por el gateway bajo el mismo prefijo. Delega toda
+ * la lógica en {@link ComponenteService} y enriquece las respuestas con enlaces
+ * HATEOAS. Este catálogo es la fuente de precio/stock que ms_cotizaciones,
+ * ms-resenas y ms-soporte consumen vía Feign a través de ComponenteResponseDTO.
+ */
 @RestController
 @RequestMapping("/api/componentes")
 @RequiredArgsConstructor
@@ -27,6 +34,7 @@ public class ComponenteController {
 
     private final ComponenteService service;
 
+    /** Lista todos los componentes del catálogo, delegando en {@link ComponenteService#buscarTodos()}. */
     @Operation(summary = "Lista todos los componentes del catálogo")
     @GetMapping
     public ResponseEntity<List<EntityModel<ComponenteResponseDTO>>> listar() {
@@ -39,6 +47,7 @@ public class ComponenteController {
         return ResponseEntity.ok(componentes);
     }
 
+    /** Busca un componente por ID vía {@link ComponenteService#buscarPorId(Long)}; responde 404 si no existe (RecursoNoEncontradoException). */
     @Operation(summary = "Busca un componente por su ID")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<ComponenteResponseDTO>> buscarUno(@PathVariable Long id) {
@@ -50,6 +59,7 @@ public class ComponenteController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Crea un componente nuevo; valida el DTO (@Valid) y delega en {@link ComponenteService#guardar(ComponenteRequestDTO)}; responde 201 Created. */
     @Operation(summary = "Agrega un nuevo componente al catálogo")
     @PostMapping
     public ResponseEntity<ComponenteResponseDTO> crear(@Valid @RequestBody ComponenteRequestDTO dto) {
@@ -57,6 +67,7 @@ public class ComponenteController {
         return new ResponseEntity<>(service.guardar(dto), HttpStatus.CREATED);
     }
 
+    /** Actualiza un componente existente; delega en {@link ComponenteService#actualizar(Long, ComponenteRequestDTO)}. */
     @Operation(summary = "Actualiza los datos de un componente existente")
     @PutMapping("/{id}")
     public ResponseEntity<ComponenteResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ComponenteRequestDTO dto) {
@@ -64,6 +75,7 @@ public class ComponenteController {
         return ResponseEntity.ok(service.actualizar(id, dto));
     }
 
+    /** Elimina un componente por ID vía {@link ComponenteService#eliminar(Long)}; responde 204 No Content. */
     @Operation(summary = "Elimina un componente del catálogo")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> borrar(@PathVariable Long id) {

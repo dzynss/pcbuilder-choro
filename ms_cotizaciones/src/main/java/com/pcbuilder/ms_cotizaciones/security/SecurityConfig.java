@@ -10,12 +10,18 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security: deshabilita CSRF/login por formulario (API stateless),
+ * permite acceso libre a Swagger y exige JWT válido para el resto de endpoints
+ * (delega la validación del token en {@link JwtAuthFilter}).
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Define la cadena de filtros HTTP: rutas públicas de Swagger, resto autenticado, JwtAuthFilter insertado antes del filtro de login estándar. */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

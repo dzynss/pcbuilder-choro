@@ -2,6 +2,11 @@ package com.pcbuilder.ms_resenas.dto;
 
 import jakarta.validation.constraints.*;
 
+/**
+ * DTO de entrada para crear/actualizar una reseña, recibido por {@code ResenaController} vía {@code @RequestBody}.
+ * Las validaciones Bean Validation son evaluadas por {@code @Valid}; los errores los captura
+ * {@code GlobalExceptionHandler#handleValidacion} y retornan 400.
+ */
 public record ResenaRequestDTO(
 
         @NotBlank(message = "El autor no puede ir vacío")

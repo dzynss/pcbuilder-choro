@@ -4,6 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO de entrada para crear/actualizar un ticket (SoporteController). idUsuario e
+ * idComponente se validan vía Feign contra ms-usuarios y ms-componentes en SoporteService
+ * antes de persistir, en lugar de confiar directamente en el request.
+ */
 public record TicketRequestDTO(
 
         @NotNull(message = "Falta el ID del usuario que reclama")

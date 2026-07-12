@@ -2,6 +2,13 @@ package com.pcbuilder.ms_componentes.dto;
 
 import jakarta.validation.constraints.*;
 
+/**
+ * DTO de entrada para crear/actualizar un componente, usado por
+ * {@link com.pcbuilder.ms_componentes.controller.ComponenteController} (POST/PUT)
+ * y validado con Bean Validation antes de llegar a
+ * {@link com.pcbuilder.ms_componentes.service.ComponenteService}.
+ * Errores de validación son capturados por GlobalExceptionHandler (400 Bad Request).
+ */
 public record ComponenteRequestDTO(
 
         @NotBlank(message = "El nombre no puede ir vacío")

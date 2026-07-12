@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Lógica de negocio de notificaciones: CRUD sobre {@link NotificacionRepository} y validación
+ * del usuario destinatario contra ms-usuarios a través de {@link UsuarioClient} (Feign).
+ * Consumido exclusivamente por {@code NotificacionController}.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,16 +28,19 @@ public class NotificacionService {
     private final NotificacionRepository repo;
     private final UsuarioClient usuarioClient;
 
+    /** Devuelve todas las notificaciones persistidas, mapeadas a DTO de respuesta. */
     public List<NotificacionResponseDTO> listarTodas() {
         log.info("Listando todas las notificaciones");
         return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
+    /** Busca una notificación por ID; lanza {@link RecursoNoEncontradoException} (→ 404) si no existe. */
     public NotificacionResponseDTO buscarPorId(Long id) {
         log.info("Buscando la notificación con ID: {}", id);
         return aResponseDTO(buscarEntidadPorId(id));
     }
 
+    /** Crea y persiste una notificación nueva; primero valida vía Feign que el usuario destinatario exista. */
     public NotificacionResponseDTO guardar(NotificacionRequestDTO dto) {
         log.info("Guardando una notificación nueva para el usuario ID: {}", dto.idUsuario());
         validarUsuarioExiste(dto.idUsuario());
@@ -49,6 +57,10 @@ public class NotificacionService {
         return aResponseDTO(guardada);
     }
 
+    /**
+     * Actualiza tipo/contenido de una notificación existente (no revalida el usuario destinatario).
+     * Lanza {@link RecursoNoEncontradoException} (→ 404) si el ID no existe.
+     */
     public NotificacionResponseDTO actualizar(Long id, NotificacionRequestDTO dto) {
         log.info("Actualizando la notificación con ID: {}", id);
         Notificacion noti = buscarEntidadPorId(id);
@@ -61,6 +73,7 @@ public class NotificacionService {
         return aResponseDTO(actualizada);
     }
 
+    /** Elimina una notificación por ID; lanza {@link RecursoNoEncontradoException} (→ 404) si no existe. */
     public void eliminar(Long id) {
         log.info("Eliminando la notificación con ID: {}", id);
         if (!repo.existsById(id)) {
@@ -69,6 +82,11 @@ public class NotificacionService {
         repo.deleteById(id);
     }
 
+    /**
+     * Confirma que el usuario destinatario exista en ms-usuarios llamando a {@link UsuarioClient} (Feign).
+     * Un 404 de ms-usuarios se traduce en {@link RecursoNoEncontradoException}; cualquier otro fallo
+     * de comunicación (timeout, 5xx) se traduce en {@link ErrorComunicacionException}.
+     */
     private void validarUsuarioExiste(Long idUsuario) {
         log.info("Validando que el usuario ID: {} exista en ms-usuarios", idUsuario);
         try {
@@ -80,11 +98,13 @@ public class NotificacionService {
         }
     }
 
+    /** Busca la entidad por ID en el repositorio o lanza {@link RecursoNoEncontradoException}. */
     private Notificacion buscarEntidadPorId(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("La notificación con ID " + id + " no existe."));
     }
 
+    /** Convierte la entidad {@link Notificacion} al DTO de respuesta expuesto por el controller. */
     private NotificacionResponseDTO aResponseDTO(Notificacion n) {
         return new NotificacionResponseDTO(n.getId(), n.getIdUsuario(), n.getTipoMensaje(),
                 n.getContenido(), n.getEstado(), n.getFechaEnvio());

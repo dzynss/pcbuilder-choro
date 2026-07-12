@@ -17,6 +17,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Lógica de negocio del login. No tiene tabla propia de usuarios: delega la validación
+ * de credenciales en ms-usuarios vía {@link UsuarioClient} (Feign) y solo persiste el
+ * registro de cada intento en {@link HistorialRepository} (tabla historial_logins).
+ * Usado por {@link com.pcbuilder.ms_login.controller.AuthController}.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +32,13 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final UsuarioClient usuarioClient;
 
+    /**
+     * Valida las credenciales contra ms-usuarios (Feign) y, si son correctas, emite un JWT
+     * vía {@link JwtUtil#generarToken}. Siempre registra el intento (EXITOSO/FALLIDO) en
+     * {@link HistorialRepository}. Un 401/404 de ms-usuarios se traduce en
+     * {@link com.pcbuilder.ms_login.exception.CredencialesInvalidasException} (401);
+     * cualquier otro fallo Feign, en {@link com.pcbuilder.ms_login.exception.ErrorComunicacionException} (502).
+     */
     public TokenResponseDTO login(LoginRequestDTO credenciales) {
         log.info("Intento de login para el correo: {}", credenciales.correo());
         HistorialLogin historial = new HistorialLogin();
@@ -53,6 +66,7 @@ public class AuthService {
         return new TokenResponseDTO(token);
     }
 
+    /** Lista todos los intentos de login registrados, mapeados a {@link HistorialResponseDTO}. */
     public List<HistorialResponseDTO> listarHistorial() {
         log.info("Listando historial de logins");
         return repo.findAll().stream()

@@ -23,10 +23,15 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
 /**
- * Filtro global del gateway que valida el JWT emitido por ms_login antes de
- * enrutar la peticion al microservicio de negocio correspondiente. Es una
- * primera linea de defensa a nivel de gateway; cada microservicio de negocio
- * valida el token de forma independiente en su propio filtro.
+ * Filtro global reactivo (WebFlux) del gateway que valida el JWT emitido por ms_login
+ * antes de enrutar la petición al microservicio de negocio correspondiente (las rutas
+ * en sí están definidas en application-dev.yml, no aquí). Deja pasar sin token las
+ * rutas bajo /api/auth/** (login) y el registro de usuario (POST /api/usuarios). Es una
+ * primera línea de defensa a nivel de gateway; cada microservicio detrás del gateway
+ * (ms-usuarios, ms-componentes, ms-resenas, ms-soporte, ms_cotizaciones, ms_despachos,
+ * ms_notificaciones, ms-inventario, ms-ofertas) también valida el JWT de forma
+ * independiente en su propio JwtAuthFilter/SecurityConfig, usando la misma clave
+ * jwt.secret, como segunda línea de defensa.
  */
 @Component
 @Slf4j
@@ -37,10 +42,16 @@ public class JwtValidationGlobalFilter implements GlobalFilter, Ordered {
 
     private final Key llaveSecreta;
 
+    /** Deriva la clave HMAC de firma a partir de la propiedad {@code jwt.secret} (misma clave que ms_login y ms-usuarios). */
     public JwtValidationGlobalFilter(@Value("${jwt.secret}") String secreto) {
         this.llaveSecreta = Keys.hmacShaKeyFor(secreto.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Deja pasar sin validar las rutas públicas (/api/auth/** y POST /api/usuarios);
+     * para el resto, exige un header Authorization Bearer con un JWT válido y firmado
+     * con la misma clave, o responde 401 vía {@link #rechazar(ServerWebExchange)}.
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -74,6 +85,7 @@ public class JwtValidationGlobalFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange);
     }
 
+    // Helper interno: escribe una respuesta 401 con cuerpo JSON estándar (timestamp/status/mensaje) y corta la cadena de filtros.
     private Mono<Void> rechazar(ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -89,6 +101,7 @@ public class JwtValidationGlobalFilter implements GlobalFilter, Ordered {
         return response.writeWith(Mono.just(buffer));
     }
 
+    /** Fija la prioridad de este filtro para que se ejecute muy temprano en la cadena, antes del enrutamiento real. */
     @Override
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE + 10;

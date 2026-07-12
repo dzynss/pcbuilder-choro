@@ -18,6 +18,11 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controlador REST de notificaciones (email/SMS), montado en /api/notificaciones.
+ * Es una capa delgada que delega toda la lógica en {@link NotificacionService} y envuelve
+ * las respuestas en {@code EntityModel} para exponer enlaces HATEOAS.
+ */
 @RestController
 @RequestMapping("/api/notificaciones")
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class NotificacionController {
 
     private final NotificacionService service;
 
+    /** GET /api/notificaciones: lista todas las notificaciones, delega en {@code service.listarTodas()}. */
     @Operation(summary = "Saca todos los correos y mensajes enviados")
     @GetMapping
     public ResponseEntity<List<EntityModel<NotificacionResponseDTO>>> listarTodas() {
@@ -39,6 +45,7 @@ public class NotificacionController {
         return ResponseEntity.ok(notis);
     }
 
+    /** GET /api/notificaciones/{id}: busca una notificación puntual; delega en {@code service.buscarPorId}, 404 si no existe. */
     @Operation(summary = "Revisa un mensaje por su ID")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<NotificacionResponseDTO>> buscarPorId(@PathVariable Long id) {
@@ -49,6 +56,10 @@ public class NotificacionController {
         return ResponseEntity.ok(recurso);
     }
 
+    /**
+     * POST /api/notificaciones: crea una notificación nueva; delega en {@code service.guardar},
+     * que valida el usuario destinatario contra ms-usuarios vía Feign antes de persistir.
+     */
     @Operation(summary = "Manda un correo o SMS nuevo (valida que el usuario exista)")
     @PostMapping
     public ResponseEntity<NotificacionResponseDTO> guardar(@Valid @RequestBody NotificacionRequestDTO dto) {
@@ -56,6 +67,7 @@ public class NotificacionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
+    /** PUT /api/notificaciones/{id}: actualiza tipo/contenido de una notificación existente; delega en {@code service.actualizar}. */
     @Operation(summary = "Edita el tipo de mensaje o el contenido de una notificación")
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<NotificacionResponseDTO>> actualizar(@PathVariable Long id,
@@ -68,6 +80,7 @@ public class NotificacionController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** DELETE /api/notificaciones/{id}: elimina una notificación; delega en {@code service.eliminar}, 404 si no existe. */
     @Operation(summary = "Borra un mensaje del registro")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

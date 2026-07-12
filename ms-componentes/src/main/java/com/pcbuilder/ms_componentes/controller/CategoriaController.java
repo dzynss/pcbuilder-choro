@@ -18,6 +18,11 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controller REST de categorías del catálogo (ej. "CPU", "RAM"), expuesto en
+ * /api/categorias. Delega la lógica en {@link CategoriaService} y enriquece las
+ * respuestas con enlaces HATEOAS.
+ */
 @RestController
 @RequestMapping("/api/categorias")
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class CategoriaController {
 
     private final CategoriaService service;
 
+    /** Lista todas las categorías, delegando en {@link CategoriaService#listarTodas()}. */
     @Operation(summary = "Lista todas las categorías del catálogo")
     @GetMapping
     public ResponseEntity<List<EntityModel<CategoriaResponseDTO>>> listar() {
@@ -39,6 +45,7 @@ public class CategoriaController {
         return ResponseEntity.ok(categorias);
     }
 
+    /** Busca una categoría por ID vía {@link CategoriaService#buscarPorId(Long)}; responde 404 si no existe (RecursoNoEncontradoException). */
     @Operation(summary = "Busca una categoría por su ID")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<CategoriaResponseDTO>> buscarUna(@PathVariable Long id) {
@@ -50,6 +57,7 @@ public class CategoriaController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Crea una categoría nueva; valida el DTO (@Valid) y delega en {@link CategoriaService#guardar(CategoriaRequestDTO)}; responde 201 Created. */
     @Operation(summary = "Agrega una nueva categoría al catálogo")
     @PostMapping
     public ResponseEntity<CategoriaResponseDTO> crear(@Valid @RequestBody CategoriaRequestDTO dto) {
@@ -57,6 +65,7 @@ public class CategoriaController {
         return new ResponseEntity<>(service.guardar(dto), HttpStatus.CREATED);
     }
 
+    /** Actualiza una categoría existente; delega en {@link CategoriaService#actualizar(Long, CategoriaRequestDTO)}. */
     @Operation(summary = "Actualiza los datos de una categoría existente")
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto) {
@@ -64,6 +73,7 @@ public class CategoriaController {
         return ResponseEntity.ok(service.actualizar(id, dto));
     }
 
+    /** Elimina una categoría por ID vía {@link CategoriaService#eliminar(Long)}; responde 204, o 409 si tiene componentes asociados. */
     @Operation(summary = "Elimina una categoría del catálogo")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> borrar(@PathVariable Long id) {

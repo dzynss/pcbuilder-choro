@@ -16,6 +16,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Lógica de negocio de cotizaciones. Orquesta {@link CotizacionRepository} para persistencia
+ * y los clientes Feign {@link UsuarioClient} / {@link ComponenteClient} para garantizar
+ * integridad referencial con ms-usuarios y ms-componentes: valida que el usuario exista
+ * y calcula el total SIEMPRE con el precio real del componente (nunca con el precio que
+ * pudiera venir manipulado en el request).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,21 +32,25 @@ public class CotizacionService {
     private final UsuarioClient usuarioClient;
     private final ComponenteClient componenteClient;
 
+    /** Lista todas las cotizaciones (usado por CotizacionController.listar). */
     public List<CotizacionResponseDTO> buscarTodos() {
         log.info("Buscando todas las cotizaciones");
         return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
+    /** Busca una cotización por ID; lanza RecursoNoEncontradoException (→ 404) si no existe. */
     public CotizacionResponseDTO buscarPorId(Long id) {
         log.info("Buscando cotización con ID: {}", id);
         return aResponseDTO(buscarEntidadPorId(id));
     }
 
+    /** Lista las cotizaciones de un usuario específico (por su ID, referenciado en ms-usuarios). */
     public List<CotizacionResponseDTO> buscarPorUsuario(Long idUsuario) {
         log.info("Buscando cotizaciones del usuario ID: {}", idUsuario);
         return repo.findByIdUsuario(idUsuario).stream().map(this::aResponseDTO).toList();
     }
 
+    /** Suma los totales (ya calculados con precio real) de todas las cotizaciones de un usuario. */
     public Double calcularTotalPorUsuario(Long idUsuario) {
         log.info("Calculando el total gastado por el usuario ID: {}", idUsuario);
         Double total = repo.findByIdUsuario(idUsuario).stream()
@@ -49,7 +60,12 @@ public class CotizacionService {
         return total;
     }
 
-    /** Valida usuario y componente en sus respectivos microservicios y calcula el total con el precio real. */
+    /**
+     * Crea una cotización nueva. Valida el usuario en ms-usuarios ({@link UsuarioClient})
+     * y obtiene el componente real (con su precio) desde ms-componentes ({@link ComponenteClient})
+     * antes de persistir, para que el total se calcule con datos confiables y no con lo que
+     * mande el cliente en el request.
+     */
     public CotizacionResponseDTO guardar(CotizacionRequestDTO dto) {
         log.info("Creando cotización para el usuario {} con el componente {}", dto.idUsuario(), dto.idComponente());
         validarUsuarioExiste(dto.idUsuario());
@@ -66,6 +82,11 @@ public class CotizacionService {
         return creada;
     }
 
+    /**
+     * Actualiza una cotización existente: re-valida usuario y componente contra los
+     * microservicios remotos y recalcula el total con el precio real vigente
+     * (no se reutiliza el total anterior ni el del request).
+     */
     public CotizacionResponseDTO actualizar(Long id, CotizacionRequestDTO dto) {
         log.info("Actualizando cotización con ID: {}", id);
         Cotizacion existente = buscarEntidadPorId(id);
@@ -82,6 +103,11 @@ public class CotizacionService {
         return actualizada;
     }
 
+    /**
+     * Calcula el total de la cotización multiplicando el PRECIO REAL del componente
+     * (obtenido de ms-componentes vía {@link ComponenteClient}, nunca del request del cliente)
+     * por la cantidad solicitada. Punto clave de integridad: evita que el usuario manipule precios.
+     */
     private double calcularTotal(ComponenteResponseDTO componente, Integer cantidad) {
         if (componente.precio() == null) {
             log.error("ms-componentes devolvió un precio inválido para el componente {}", componente.id());
@@ -91,6 +117,7 @@ public class CotizacionService {
         return componente.precio() * cantidad;
     }
 
+    /** Elimina una cotización por ID; lanza RecursoNoEncontradoException (→ 404) si no existe. */
     public void eliminar(Long id) {
         log.info("Eliminando cotización con ID: {}", id);
         if (!repo.existsById(id)) {
@@ -101,6 +128,11 @@ public class CotizacionService {
         log.info("Cotización con ID {} eliminada correctamente", id);
     }
 
+    /**
+     * Verifica que el usuario exista llamando a ms-usuarios vía {@link UsuarioClient}.
+     * FeignException.NotFound → RecursoNoEncontradoException (404); cualquier otro
+     * FeignException (timeout, 5xx, etc.) → ErrorComunicacionException (502).
+     */
     private void validarUsuarioExiste(Long idUsuario) {
         try {
             usuarioClient.buscarPorId(idUsuario);
@@ -113,6 +145,11 @@ public class CotizacionService {
         }
     }
 
+    /**
+     * Obtiene el componente (incluyendo su precio real) desde ms-componentes vía
+     * {@link ComponenteClient}. FeignException.NotFound → RecursoNoEncontradoException (404);
+     * cualquier otro FeignException → ErrorComunicacionException (502).
+     */
     private ComponenteResponseDTO obtenerComponente(Long idComponente) {
         try {
             return componenteClient.buscarPorId(idComponente);
@@ -125,6 +162,7 @@ public class CotizacionService {
         }
     }
 
+    /** Obtiene la entidad Cotizacion desde el repositorio o lanza RecursoNoEncontradoException (→ 404). */
     private Cotizacion buscarEntidadPorId(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> {
@@ -133,6 +171,7 @@ public class CotizacionService {
                 });
     }
 
+    /** Convierte la entidad Cotizacion al DTO expuesto por el controller. */
     private CotizacionResponseDTO aResponseDTO(Cotizacion c) {
         return new CotizacionResponseDTO(c.getId(), c.getIdUsuario(), c.getIdComponente(), c.getCantidad(), c.getTotal());
     }

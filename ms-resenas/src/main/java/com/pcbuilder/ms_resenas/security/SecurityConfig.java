@@ -10,12 +10,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security de ms-resenas: API stateless, protegida por JWT.
+ * Deja libres Swagger/OpenAPI y exige autenticación (token válido, vía {@link JwtAuthFilter}) para el resto de rutas.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Define la cadena de filtros: sin CSRF/sesión, rutas de Swagger públicas, resto autenticado, JwtAuthFilter insertado antes del filtro estándar de login. */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

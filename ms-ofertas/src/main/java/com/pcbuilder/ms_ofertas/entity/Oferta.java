@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+/**
+ * Entidad JPA que representa un cupón de descuento. Se mapea a la tabla "ofertas"
+ * (esquema definido por Liquibase en db.changelog-master.xml, ddl-auto=validate).
+ * Servicio autocontenido: no depende de otro microservicio ni es consumido vía Feign por otros.
+ */
 @Entity
 @Table(name = "ofertas")
 @Data

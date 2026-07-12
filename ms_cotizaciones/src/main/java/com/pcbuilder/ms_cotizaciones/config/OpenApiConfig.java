@@ -7,9 +7,11 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/** Configuración de springdoc-openapi: agrega el esquema de seguridad "bearerAuth" a Swagger UI para poder probar endpoints protegidos con JWT. */
 @Configuration
 public class OpenApiConfig {
 
+    /** Declara el esquema HTTP Bearer/JWT usado por todos los endpoints documentados en Swagger. */
     @Bean
     public OpenAPI customOpenAPI() {
         final String schemeName = "bearerAuth";

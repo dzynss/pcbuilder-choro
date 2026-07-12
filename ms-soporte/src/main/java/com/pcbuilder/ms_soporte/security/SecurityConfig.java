@@ -10,12 +10,18 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security: exige JWT válido en todos los endpoints excepto
+ * Swagger/OpenAPI, sin sesiones (stateless), sin CSRF/login por formulario/basic auth.
+ * Registra {@link JwtAuthFilter} antes del filtro estándar de autenticación por usuario/contraseña.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Define la cadena de filtros HTTP: rutas públicas (Swagger), resto autenticado, y manejo de 401 sin token. */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

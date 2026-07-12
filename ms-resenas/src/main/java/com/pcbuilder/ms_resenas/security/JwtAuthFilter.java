@@ -21,16 +21,24 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.List;
 
+/**
+ * Filtro HTTP (una vez por request) que valida el JWT emitido por ms_login.
+ * Registrado en {@link SecurityConfig} antes de {@code UsernamePasswordAuthenticationFilter};
+ * si el token es válido, autentica el request en el {@code SecurityContext}; si falta o es inválido, lo deja anónimo
+ * y {@code SecurityConfig} decide si la ruta requiere autenticación.
+ */
 @Component
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final Key llaveSecreta;
 
+    /** Deriva la llave HMAC de firma a partir de la property {@code jwt.secret} (debe coincidir con la de ms_login). */
     public JwtAuthFilter(@Value("${jwt.secret}") String secreto) {
         this.llaveSecreta = Keys.hmacShaKeyFor(secreto.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** Extrae el token del header Authorization, lo valida y, si es correcto, setea la autenticación en el contexto. */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                      @NonNull HttpServletResponse response,

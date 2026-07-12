@@ -7,9 +7,14 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuración de springdoc-openapi para que Swagger UI muestre el botón "Authorize" con Bearer JWT,
+ * acorde a la autenticación exigida por {@code SecurityConfig}.
+ */
 @Configuration
 public class OpenApiConfig {
 
+    /** Declara el esquema de seguridad "bearerAuth" (JWT) y lo aplica globalmente a la documentación OpenAPI. */
     @Bean
     public OpenAPI customOpenAPI() {
         final String schemeName = "bearerAuth";

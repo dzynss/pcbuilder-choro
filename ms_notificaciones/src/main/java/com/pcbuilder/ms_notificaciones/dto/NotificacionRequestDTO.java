@@ -4,6 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * DTO de entrada para crear/actualizar una notificación; usado por {@code NotificacionController}
+ * en los endpoints POST y PUT, validado con Bean Validation antes de llegar al service.
+ */
 public record NotificacionRequestDTO(
 
         @NotNull(message = "Falta el ID del usuario destinatario")

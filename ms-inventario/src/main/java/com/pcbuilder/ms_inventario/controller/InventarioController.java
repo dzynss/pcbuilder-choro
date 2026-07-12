@@ -18,6 +18,10 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controlador REST de inventario (/api/inventario). Capa fina: delega toda la lógica en InventarioService
+ * y envuelve las respuestas en EntityModel (HATEOAS) con enlaces a sí mismo y al listado completo.
+ */
 @RestController
 @RequestMapping("/api/inventario")
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class InventarioController {
 
     private final InventarioService service;
 
+    /** Lista todos los registros de inventario; delega en InventarioService.listarTodos(). */
     @Operation(summary = "Saca todos los registros de la bodega")
     @GetMapping
     public ResponseEntity<List<EntityModel<InventarioResponseDTO>>> listarTodos() {
@@ -39,6 +44,7 @@ public class InventarioController {
         return ResponseEntity.ok(inventario);
     }
 
+    /** Busca un registro de inventario por su ID interno; 404 (vía GlobalExceptionHandler) si no existe. */
     @Operation(summary = "Busca el stock de una pieza por su ID interno")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<InventarioResponseDTO>> buscarPorId(@PathVariable Long id) {
@@ -50,6 +56,7 @@ public class InventarioController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Crea un nuevo registro de inventario a partir del DTO validado; responde HTTP 201 (CREATED). */
     @Operation(summary = "Agrega nueva merca a la bodega")
     @PostMapping
     public ResponseEntity<InventarioResponseDTO> guardar(@Valid @RequestBody InventarioRequestDTO dto) {
@@ -57,6 +64,7 @@ public class InventarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
+    /** Actualiza cantidad y ubicación de un registro de inventario existente identificado por ID. */
     @Operation(summary = "Actualiza el stock de un registro de inventario")
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<InventarioResponseDTO>> actualizar(@PathVariable Long id,
@@ -69,6 +77,7 @@ public class InventarioController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Elimina un registro de inventario por ID; responde HTTP 204 (NO_CONTENT). */
     @Operation(summary = "Borra un registro si se quemó la bodega")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

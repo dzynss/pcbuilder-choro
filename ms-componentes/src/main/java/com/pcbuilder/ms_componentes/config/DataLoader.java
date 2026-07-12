@@ -20,6 +20,12 @@ public class DataLoader implements CommandLineRunner {
     private final ComponenteRepository componenteRepo;
     private final CategoriaRepository categoriaRepo;
 
+    /**
+     * Se ejecuta automáticamente al arrancar la app (CommandLineRunner). Si ya hay
+     * al menos 10 componentes no hace nada; de lo contrario busca la categoría
+     * "CPU" (sembrada por Liquibase) y guarda algunos componentes de ejemplo vía
+     * {@link ComponenteRepository}.
+     */
     @Override
     public void run(String... args) {
         if (componenteRepo.count() >= 10) {
@@ -34,6 +40,7 @@ public class DataLoader implements CommandLineRunner {
         componenteRepo.save(crearComponente("Ryzen 5 5600G", "AMD", 150000.0, 30, cpu));
     }
 
+    /** Construye una entity {@link Componente} en memoria con los datos dados, lista para persistir. */
     private Componente crearComponente(String nombre, String marca, Double precio, Integer stock, Categoria categoria) {
         Componente c = new Componente();
         c.setNombre(nombre);

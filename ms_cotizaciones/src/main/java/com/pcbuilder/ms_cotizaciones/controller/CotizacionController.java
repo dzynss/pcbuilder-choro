@@ -18,6 +18,12 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controlador REST de cotizaciones, expuesto en /api/cotizaciones (a través del gateway
+ * en /api/cotizaciones/**). Es una capa delgada: delega toda la lógica de negocio
+ * (incluyendo la validación de usuario/componente vía Feign) en {@link CotizacionService}
+ * y envuelve las respuestas con enlaces HATEOAS ({@code EntityModel}).
+ */
 @RestController
 @RequestMapping("/api/cotizaciones")
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class CotizacionController {
 
     private final CotizacionService service;
 
+    /** Lista las cotizaciones de un usuario; delega en {@code CotizacionService.buscarPorUsuario}. */
     @Operation(summary = "Busca todas las cotizaciones de un usuario")
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<List<EntityModel<CotizacionResponseDTO>>> buscarPorUsuario(@PathVariable Long idUsuario) {
@@ -38,6 +45,7 @@ public class CotizacionController {
         return ResponseEntity.ok(cotizaciones);
     }
 
+    /** Suma el total gastado por un usuario en todas sus cotizaciones; delega en {@code CotizacionService.calcularTotalPorUsuario}. */
     @Operation(summary = "Calcula el total gastado por un usuario en todas sus cotizaciones")
     @GetMapping("/usuario/{idUsuario}/total")
     public ResponseEntity<EntityModel<Double>> totalPorUsuario(@PathVariable Long idUsuario) {
@@ -48,6 +56,7 @@ public class CotizacionController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Lista todas las cotizaciones registradas; delega en {@code CotizacionService.buscarTodos}. */
     @Operation(summary = "Lista todas las cotizaciones")
     @GetMapping
     public ResponseEntity<List<EntityModel<CotizacionResponseDTO>>> listar() {
@@ -59,6 +68,7 @@ public class CotizacionController {
         return ResponseEntity.ok(cotizaciones);
     }
 
+    /** Busca una cotización por ID; delega en {@code CotizacionService.buscarPorId} (404 si no existe, vía RecursoNoEncontradoException). */
     @Operation(summary = "Busca una cotización por su ID")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<CotizacionResponseDTO>> buscarUno(@PathVariable Long id) {
@@ -69,6 +79,11 @@ public class CotizacionController {
         return ResponseEntity.ok(recurso);
     }
 
+    /**
+     * Crea una cotización nueva. Delega en {@code CotizacionService.guardar}, que valida
+     * el usuario contra ms-usuarios y obtiene el precio real del componente desde
+     * ms-componentes (vía Feign) para calcular el total; el cliente no puede manipular el precio.
+     */
     @Operation(summary = "Crea una cotización validando usuario y componente, y calculando el total")
     @PostMapping
     public ResponseEntity<CotizacionResponseDTO> crear(@Valid @RequestBody CotizacionRequestDTO dto) {
@@ -76,6 +91,7 @@ public class CotizacionController {
         return new ResponseEntity<>(service.guardar(dto), HttpStatus.CREATED);
     }
 
+    /** Actualiza una cotización existente; delega en {@code CotizacionService.actualizar}, que re-valida usuario/componente y recalcula el total. */
     @Operation(summary = "Actualiza una cotización existente")
     @PutMapping("/{id}")
     public ResponseEntity<CotizacionResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody CotizacionRequestDTO dto) {
@@ -83,6 +99,7 @@ public class CotizacionController {
         return ResponseEntity.ok(service.actualizar(id, dto));
     }
 
+    /** Elimina una cotización por ID; delega en {@code CotizacionService.eliminar} (404 si no existe). */
     @Operation(summary = "Elimina una cotización")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> borrar(@PathVariable Long id) {

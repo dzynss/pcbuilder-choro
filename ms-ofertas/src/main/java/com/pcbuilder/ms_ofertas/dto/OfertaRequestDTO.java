@@ -2,6 +2,10 @@ package com.pcbuilder.ms_ofertas.dto;
 
 import jakarta.validation.constraints.*;
 
+/**
+ * DTO de entrada para crear/actualizar un cupón de oferta.
+ * Recibido por OfertaController (guardar/actualizar), validado con Bean Validation antes de llegar a OfertaService.
+ */
 public record OfertaRequestDTO(
 
         @NotBlank(message = "El código del cupón no puede ir en blanco")

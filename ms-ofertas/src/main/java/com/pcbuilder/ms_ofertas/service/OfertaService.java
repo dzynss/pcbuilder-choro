@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Lógica de negocio de ofertas/cupones: usa OfertaRepository para la persistencia y traduce entre
+ * la entity Oferta y los DTOs de request/response. Es consumido por OfertaController.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -18,16 +22,19 @@ public class OfertaService {
 
     private final OfertaRepository repo;
 
+    /** Devuelve todos los cupones, mapeados a OfertaResponseDTO. */
     public List<OfertaResponseDTO> listarTodas() {
         log.info("Listando todas las ofertas");
         return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
+    /** Busca un cupón por ID; delega en buscarEntidadPorId, que lanza RecursoNoEncontradoException si no existe. */
     public OfertaResponseDTO buscarPorId(Long id) {
         log.info("Buscando la oferta con ID: {}", id);
         return aResponseDTO(buscarEntidadPorId(id));
     }
 
+    /** Busca un cupón por su código (normalizado a mayúsculas); lanza RecursoNoEncontradoException (-> 404) si no existe. */
     public OfertaResponseDTO buscarPorCodigo(String codigo) {
         log.info("Buscando la oferta con código: {}", codigo);
         Oferta oferta = repo.findByCodigo(codigo.toUpperCase())
@@ -38,6 +45,7 @@ public class OfertaService {
         return aResponseDTO(oferta);
     }
 
+    /** Crea y persiste un nuevo cupón; el código se guarda normalizado en mayúsculas. */
     public OfertaResponseDTO guardar(OfertaRequestDTO dto) {
         log.info("Guardando la oferta con código: {}", dto.codigo());
         Oferta oferta = new Oferta();
@@ -61,6 +69,7 @@ public class OfertaService {
         return aResponseDTO(actualizada);
     }
 
+    /** Elimina un cupón por ID; lanza RecursoNoEncontradoException (-> 404) si no existe. */
     public void eliminar(Long id) {
         log.warn("Eliminando la oferta con ID: {}", id);
         if (!repo.existsById(id)) {
@@ -71,7 +80,10 @@ public class OfertaService {
         log.info("Oferta ID {} eliminada", id);
     }
 
-    /** Regla de negocio: aplica el descuento de la oferta sobre un monto base. */
+    /**
+     * Regla de negocio: aplica el porcentaje de descuento de la oferta sobre un monto base.
+     * Valida que el monto sea positivo y que la oferta siga activa antes de calcular.
+     */
     public double aplicarDescuento(OfertaResponseDTO oferta, double montoBase) {
         log.info("Aplicando descuento de la oferta {} sobre el monto {}", oferta.codigo(), montoBase);
         if (montoBase <= 0) {
@@ -85,6 +97,7 @@ public class OfertaService {
         return montoBase - (montoBase * oferta.porcentajeDescuento() / 100.0);
     }
 
+    /** Busca la entity Oferta por ID o lanza RecursoNoEncontradoException si no existe. */
     private Oferta buscarEntidadPorId(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> {
@@ -93,6 +106,7 @@ public class OfertaService {
                 });
     }
 
+    /** Convierte la entity Oferta a su DTO de respuesta. */
     private OfertaResponseDTO aResponseDTO(Oferta o) {
         return new OfertaResponseDTO(o.getId(), o.getCodigo(), o.getPorcentajeDescuento(), o.isActiva());
     }

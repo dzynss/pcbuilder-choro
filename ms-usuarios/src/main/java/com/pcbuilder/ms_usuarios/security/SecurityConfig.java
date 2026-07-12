@@ -11,12 +11,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security de este microservicio: sesión sin estado (JWT),
+ * permite sin autenticación Swagger, POST /api/usuarios (registro) y POST
+ * /api/usuarios/login; el resto de rutas requiere un JWT válido, verificado por
+ * {@link JwtAuthFilter}. Si la autenticación falla, responde HTTP 401.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Define la cadena de filtros de seguridad HTTP: reglas de autorización por ruta y el orden en que se inserta {@link JwtAuthFilter}. */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

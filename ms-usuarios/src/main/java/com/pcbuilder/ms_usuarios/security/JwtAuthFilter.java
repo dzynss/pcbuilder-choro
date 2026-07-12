@@ -21,16 +21,26 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.List;
 
+/**
+ * Filtro de Servlet (ejecutado una vez por request) que valida el JWT emitido por
+ * ms_login usando la misma clave secreta ({@code jwt.secret}). Si el token es válido,
+ * puebla el {@link SecurityContextHolder} para que {@link SecurityConfig} autorice la
+ * petición; si falta o es inválido, limpia el contexto y deja que SecurityConfig
+ * rechace la request con 401. Se registra como el filtro antes de
+ * UsernamePasswordAuthenticationFilter en la cadena de Spring Security.
+ */
 @Component
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final Key llaveSecreta;
 
+    /** Deriva la clave HMAC de firma a partir de la propiedad {@code jwt.secret} (compartida con ms_login y el gateway). */
     public JwtAuthFilter(@Value("${jwt.secret}") String secreto) {
         this.llaveSecreta = Keys.hmacShaKeyFor(secreto.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** Extrae el header Authorization Bearer, valida el JWT y, si es válido, autentica al usuario (correo como principal) para esta request. */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                      @NonNull HttpServletResponse response,

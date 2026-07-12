@@ -10,12 +10,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de Spring Security de ms_despachos: API sin sesión (stateless), protegida por JWT.
+ * Se apoya en JwtAuthFilter para autenticar la request antes de llegar a los controllers.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /**
+     * Define la cadena de filtros: desactiva CSRF/login por formulario (API stateless),
+     * permite libre acceso a Swagger/OpenAPI, exige autenticación en el resto de rutas
+     * y responde 401 cuando falta o es inválido el JWT.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

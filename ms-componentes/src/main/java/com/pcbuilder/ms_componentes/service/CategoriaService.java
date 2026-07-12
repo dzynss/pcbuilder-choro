@@ -13,6 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Lógica de negocio de categorías del catálogo. Usada por {@link com.pcbuilder.ms_componentes.controller.CategoriaController}.
+ * Convierte entre {@link Categoria} y los DTOs de request/response, y usa
+ * {@link ComponenteRepository} para validar que no queden componentes huérfanos al eliminar.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,16 +26,19 @@ public class CategoriaService {
     private final CategoriaRepository repo;
     private final ComponenteRepository componenteRepo;
 
+    /** Devuelve todas las categorías del catálogo como DTOs de respuesta. */
     public List<CategoriaResponseDTO> listarTodas() {
         log.info("Listando todas las categorías");
         return repo.findAll().stream().map(this::aResponseDTO).toList();
     }
 
+    /** Busca una categoría por ID; lanza {@link RecursoNoEncontradoException} (404) si no existe. */
     public CategoriaResponseDTO buscarPorId(Long id) {
         log.info("Buscando la categoría con ID: {}", id);
         return aResponseDTO(buscarEntidadPorId(id));
     }
 
+    /** Crea y persiste una nueva categoría a partir del DTO de request. */
     public CategoriaResponseDTO guardar(CategoriaRequestDTO dto) {
         log.info("Creando una nueva categoría: {}", dto.nombre());
         Categoria categoria = new Categoria();
@@ -38,6 +46,7 @@ public class CategoriaService {
         return aResponseDTO(repo.save(categoria));
     }
 
+    /** Actualiza el nombre de una categoría existente; lanza {@link RecursoNoEncontradoException} (404) si no existe. */
     public CategoriaResponseDTO actualizar(Long id, CategoriaRequestDTO dto) {
         log.info("Actualizando la categoría con ID: {}", id);
         Categoria existente = buscarEntidadPorId(id);
@@ -45,6 +54,11 @@ public class CategoriaService {
         return aResponseDTO(repo.save(existente));
     }
 
+    /**
+     * Elimina una categoría por ID. Lanza {@link RecursoNoEncontradoException} (404) si no
+     * existe, o {@link DataIntegrityViolationException} (409, vía GlobalExceptionHandler) si
+     * todavía tiene componentes asociados.
+     */
     public void eliminar(Long id) {
         if (!repo.existsById(id)) {
             log.warn("Se intentó eliminar la categoría con ID {} pero no existe", id);
@@ -62,6 +76,7 @@ public class CategoriaService {
         repo.deleteById(id);
     }
 
+    /** Busca la entity por ID o lanza {@link RecursoNoEncontradoException}; usado internamente por buscar/actualizar/eliminar. */
     private Categoria buscarEntidadPorId(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> {
@@ -70,6 +85,7 @@ public class CategoriaService {
                 });
     }
 
+    /** Mapea la entity {@link Categoria} al DTO de respuesta expuesto por el controller. */
     private CategoriaResponseDTO aResponseDTO(Categoria c) {
         return new CategoriaResponseDTO(c.getId(), c.getNombre());
     }

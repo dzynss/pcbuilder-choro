@@ -6,6 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * Entidad JPA que representa el stock de un componente en la bodega.
+ * Se mapea a la tabla "inventario" (esquema definido por Liquibase en db.changelog-master.xml, ddl-auto=validate).
+ * Servicio autocontenido: idComponente es solo una referencia numérica al componente de ms-componentes, sin validación cruzada vía Feign.
+ */
 @Entity
 @Table(name = "inventario")
 @Data
@@ -26,6 +31,7 @@ public class Inventario {
     
     private LocalDateTime ultimaActualizacion;
 
+    /** Callback de JPA que actualiza la marca de tiempo de última modificación antes de insertar o actualizar. */
     @PrePersist
     @PreUpdate
     public void actualizarFecha() {

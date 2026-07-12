@@ -18,6 +18,10 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controlador REST de ofertas/cupones (/api/ofertas). Capa fina: delega toda la lógica en OfertaService
+ * y envuelve las respuestas en EntityModel (HATEOAS) con enlaces a sí mismo y al listado completo.
+ */
 @RestController
 @RequestMapping("/api/ofertas")
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class OfertaController {
 
     private final OfertaService service;
 
+    /** Lista todos los cupones registrados; delega en OfertaService.listarTodas(). */
     @Operation(summary = "Saca todos los cupones registrados")
     @GetMapping
     public ResponseEntity<List<EntityModel<OfertaResponseDTO>>> listarTodas() {
@@ -39,6 +44,7 @@ public class OfertaController {
         return ResponseEntity.ok(ofertas);
     }
 
+    /** Busca un cupón por su ID interno; 404 (vía GlobalExceptionHandler) si no existe. */
     @Operation(summary = "Busca un cupón por su ID")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<OfertaResponseDTO>> buscarPorId(@PathVariable Long id) {
@@ -49,6 +55,7 @@ public class OfertaController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Valida y busca un cupón por su código promocional (ej. al aplicar un cupón en una cotización). */
     @Operation(summary = "Valida un código promocional (Ej: PCGAMER2026)")
     @GetMapping("/codigo/{codigo}")
     public ResponseEntity<EntityModel<OfertaResponseDTO>> buscarPorCodigo(@PathVariable String codigo) {
@@ -59,6 +66,7 @@ public class OfertaController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Crea un nuevo cupón a partir del DTO validado; responde HTTP 201 (CREATED). */
     @Operation(summary = "Crea un cupón nuevo")
     @PostMapping
     public ResponseEntity<OfertaResponseDTO> guardar(@Valid @RequestBody OfertaRequestDTO dto) {
@@ -66,6 +74,7 @@ public class OfertaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(dto));
     }
 
+    /** Actualiza el porcentaje de descuento de un cupón existente (el código no es editable por esta vía). */
     @Operation(summary = "Actualiza el porcentaje de descuento de un cupón existente")
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<OfertaResponseDTO>> actualizar(@PathVariable Long id,
@@ -78,6 +87,7 @@ public class OfertaController {
         return ResponseEntity.ok(recurso);
     }
 
+    /** Elimina un cupón por ID; responde HTTP 204 (NO_CONTENT). */
     @Operation(summary = "Borra un cupón que ya venció")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO de request para crear/actualizar un usuario (POST y PUT en
+ * {@link com.pcbuilder.ms_usuarios.controller.UsuarioController}); validado con Bean
+ * Validation y mapeado a la entidad {@link com.pcbuilder.ms_usuarios.entity.Usuario}
+ * dentro de {@link com.pcbuilder.ms_usuarios.service.UsuarioService}.
+ */
 public record UsuarioRequestDTO(
 
         @NotBlank(message = "Vo' soy vio, el nombre no puede ir vacío")
