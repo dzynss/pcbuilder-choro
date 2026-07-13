@@ -26,4 +26,14 @@
         <insert tableName="historial_logins"><column name="correo_usuario" value="maicol@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-16T20:10:00"/><column name="estado" value="EXITOSO"/></insert>
         <insert tableName="historial_logins"><column name="correo_usuario" value="rosa@pcbuilder.cl"/><column name="fecha_hora" value="2026-05-17T08:05:00"/><column name="estado" value="EXITOSO"/></insert>
     </changeSet>
+
+    <changeSet id="3" author="ganga3pelos">
+        <createTable tableName="tokens_jwt">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true"/></column>
+            <column name="correo_usuario" type="VARCHAR(255)"/>
+            <column name="token" type="VARCHAR(500)"/>
+            <column name="fecha_emision" type="DATETIME"/>
+            <column name="fecha_expiracion" type="DATETIME"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

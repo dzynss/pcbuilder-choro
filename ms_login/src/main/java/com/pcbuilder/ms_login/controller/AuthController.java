@@ -2,6 +2,7 @@ package com.pcbuilder.ms_login.controller;
 
 import com.pcbuilder.ms_login.dto.HistorialResponseDTO;
 import com.pcbuilder.ms_login.dto.LoginRequestDTO;
+import com.pcbuilder.ms_login.dto.TokenJwtResponseDTO;
 import com.pcbuilder.ms_login.dto.TokenResponseDTO;
 import com.pcbuilder.ms_login.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,5 +58,18 @@ public class AuthController {
                 .map(h -> EntityModel.of(h, linkTo(methodOn(AuthController.class).historial()).withSelfRel()))
                 .toList();
         return ResponseEntity.ok(historial);
+    }
+
+    /**
+     * GET /api/auth/tokens: delega en {@link AuthService#listarTokens} y envuelve
+     * cada resultado en un EntityModel HATEOAS con su enlace propio (self).
+     */
+    @Operation(summary = "Lista los tokens JWT registrados tras cada login exitoso")
+    @GetMapping("/tokens")
+    public ResponseEntity<List<EntityModel<TokenJwtResponseDTO>>> tokens() {
+        List<EntityModel<TokenJwtResponseDTO>> tokens = service.listarTokens().stream()
+                .map(t -> EntityModel.of(t, linkTo(methodOn(AuthController.class).tokens()).withSelfRel()))
+                .toList();
+        return ResponseEntity.ok(tokens);
     }
 }

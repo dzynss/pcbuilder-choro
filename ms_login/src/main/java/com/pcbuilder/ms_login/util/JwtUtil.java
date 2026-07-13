@@ -1,5 +1,6 @@
 package com.pcbuilder.ms_login.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 /**
@@ -40,5 +43,19 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + TIEMPO_EXPIRACION))
                 .signWith(llaveSecreta)
                 .compact();
+    }
+
+    /**
+     * Extrae la fecha de expiración de un JWT ya emitido (parseando y validando su firma).
+     * Usado por {@link com.pcbuilder.ms_login.service.AuthService#registrarToken} para persistir
+     * la vigencia real del token sin duplicar la constante {@link #TIEMPO_EXPIRACION} en otra capa.
+     */
+    public LocalDateTime obtenerExpiracion(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(llaveSecreta)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 }
