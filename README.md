@@ -1,4 +1,4 @@
-# PC Builder
+# PC Builder (choro)
 
 Sistema de microservicios (proyecto escolar, curso Fullstack I) para armar y cotizar PCs: catálogo de componentes, inventario, cupones de descuento, reseñas, soporte técnico, cotizaciones, despachos, notificaciones, login y un gateway como punto único de entrada.
 
