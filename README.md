@@ -74,4 +74,4 @@ El gateway (puerto `9099`) no expone Swagger propio; enruta las peticiones `/api
 ## Integrantes
 
 - Martín Narváez — implementación de ms-usuarios, ms-componentes, ms-resenas, ms_cotizaciones, ms_login
-- Martin — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
+- Javier Jorquera — implementación de ms-inventario, ms-ofertas, ms-soporte, ms_despachos, ms_notificaciones
