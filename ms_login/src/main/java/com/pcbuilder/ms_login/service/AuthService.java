@@ -3,12 +3,15 @@ package com.pcbuilder.ms_login.service;
 import com.pcbuilder.ms_login.client.UsuarioClient;
 import com.pcbuilder.ms_login.dto.HistorialResponseDTO;
 import com.pcbuilder.ms_login.dto.LoginRequestDTO;
+import com.pcbuilder.ms_login.dto.RegistroRequestDTO;
 import com.pcbuilder.ms_login.dto.TokenJwtResponseDTO;
 import com.pcbuilder.ms_login.dto.TokenResponseDTO;
+import com.pcbuilder.ms_login.dto.UsuarioResponseDTO;
 import com.pcbuilder.ms_login.entity.HistorialLogin;
 import com.pcbuilder.ms_login.entity.TokenJwt;
 import com.pcbuilder.ms_login.exception.CredencialesInvalidasException;
 import com.pcbuilder.ms_login.exception.ErrorComunicacionException;
+import com.pcbuilder.ms_login.exception.RegistroInvalidoException;
 import com.pcbuilder.ms_login.repository.HistorialRepository;
 import com.pcbuilder.ms_login.repository.TokenJwtRepository;
 import com.pcbuilder.ms_login.util.JwtUtil;
@@ -68,6 +71,35 @@ public class AuthService {
         repo.save(historial);
         registrarToken(credenciales.correo(), token);
         log.info("Login exitoso para el correo: {}", credenciales.correo());
+        return new TokenResponseDTO(token);
+    }
+
+    /**
+     * Registra un usuario nuevo delegando en ms-usuarios (Feign) y, si se crea con éxito,
+     * emite un JWT igual que {@link #login}. Un correo duplicado o datos inválidos en
+     * ms-usuarios se traducen en {@link RegistroInvalidoException} (409); cualquier otro
+     * fallo Feign, en {@link ErrorComunicacionException} (502).
+     */
+    public TokenResponseDTO registrar(RegistroRequestDTO datos) {
+        log.info("Intento de registro para el correo: {}", datos.correo());
+
+        UsuarioResponseDTO usuarioCreado;
+        try {
+            usuarioCreado = usuarioClient.registrar(datos);
+        } catch (FeignException.Conflict e) {
+            log.warn("Correo ya registrado: {}", datos.correo());
+            throw new RegistroInvalidoException("El correo ya está registrado.");
+        } catch (FeignException.BadRequest e) {
+            log.warn("Datos de registro inválidos para {}: {}", datos.correo(), e.getMessage());
+            throw new RegistroInvalidoException("Datos de registro inválidos.");
+        } catch (FeignException e) {
+            log.error("Error de comunicación con ms-usuarios al registrar el correo {}: {}", datos.correo(), e.getMessage());
+            throw new ErrorComunicacionException("ms-usuarios no respondió correctamente: " + e.getMessage());
+        }
+
+        String token = jwtUtil.generarToken(usuarioCreado.correo());
+        registrarToken(usuarioCreado.correo(), token);
+        log.info("Registro exitoso, token emitido para: {}", usuarioCreado.correo());
         return new TokenResponseDTO(token);
     }
 

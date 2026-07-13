@@ -1,6 +1,7 @@
 package com.pcbuilder.ms_login.client;
 
 import com.pcbuilder.ms_login.dto.LoginRequestDTO;
+import com.pcbuilder.ms_login.dto.RegistroRequestDTO;
 import com.pcbuilder.ms_login.dto.UsuarioResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,4 +20,8 @@ public interface UsuarioClient {
     /** Llama a POST /api/usuarios/login en ms-usuarios para verificar correo/contraseña. */
     @PostMapping("/api/usuarios/login")
     UsuarioResponseDTO login(@RequestBody LoginRequestDTO credenciales);
+
+    /** Llama a POST /api/usuarios en ms-usuarios para crear un usuario nuevo. */
+    @PostMapping("/api/usuarios")
+    UsuarioResponseDTO registrar(@RequestBody RegistroRequestDTO datos);
 }

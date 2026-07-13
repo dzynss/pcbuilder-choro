@@ -2,6 +2,7 @@ package com.pcbuilder.ms_login.controller;
 
 import com.pcbuilder.ms_login.dto.HistorialResponseDTO;
 import com.pcbuilder.ms_login.dto.LoginRequestDTO;
+import com.pcbuilder.ms_login.dto.RegistroRequestDTO;
 import com.pcbuilder.ms_login.dto.TokenJwtResponseDTO;
 import com.pcbuilder.ms_login.dto.TokenResponseDTO;
 import com.pcbuilder.ms_login.service.AuthService;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +47,21 @@ public class AuthController {
         TokenResponseDTO token = service.login(credenciales);
         log.info("Token generado correctamente pa' {}", credenciales.correo());
         return ResponseEntity.ok(token);
+    }
+
+    /**
+     * POST /api/auth/register: delega en {@link AuthService#registrar} para crear el
+     * usuario en ms-usuarios y devuelve un JWT (auto-login tras registro). Errores de
+     * correo duplicado/datos inválidos o de comunicación son manejados por
+     * GlobalExceptionHandler (409/502 respectivamente).
+     */
+    @Operation(summary = "Registra un usuario nuevo en ms-usuarios y devuelve un token JWT")
+    @PostMapping("/register")
+    public ResponseEntity<TokenResponseDTO> registrar(@Valid @RequestBody RegistroRequestDTO datos) {
+        log.info("Registro solicitado para el correo {}", datos.correo());
+        TokenResponseDTO token = service.registrar(datos);
+        log.info("Registro y token generados correctamente pa' {}", datos.correo());
+        return new ResponseEntity<>(token, HttpStatus.CREATED);
     }
 
     /**

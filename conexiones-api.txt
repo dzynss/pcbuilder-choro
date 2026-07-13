@@ -15,6 +15,7 @@ http://localhost:8084/api/resenas
 http://localhost:8085/api/componentes
 POST    http://localhost:8086/api/auth/login
 GET     http://localhost:8086/api/auth/historial
+GET     http://localhost:8086/api/auth/tokens (Lista los tokens para logins exitosos.)
 (el alta de usuarios es POST http://localhost:8083/api/usuarios, no existe /api/auth/registro)
 http://localhost:8087/api/cotizaciones
 http://localhost:9090/api/inventario
