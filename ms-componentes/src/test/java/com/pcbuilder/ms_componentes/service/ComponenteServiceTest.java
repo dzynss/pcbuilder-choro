@@ -36,12 +36,12 @@ class ComponenteServiceTest {
     void buscarPorId_deberiaRetornarComponente_cuandoExiste() {
         // Given
         Categoria categoria = new Categoria();
-        categoria.setId(1L);
+        categoria.setId(10L);
         categoria.setNombre("GPU");
 
         Componente componente = new Componente();
         componente.setId(10L);
-        componente.setNombre("RTX 4070");
+        componente.setNombre("RTX 4080");
         componente.setMarca("Nvidia");
         componente.setPrecio(500000.0);
         componente.setStock(5);
@@ -53,7 +53,7 @@ class ComponenteServiceTest {
         ComponenteResponseDTO resultado = service.buscarPorId(10L);
 
         // Then
-        assertThat(resultado.nombre()).isEqualTo("RTX 4070");
+        assertThat(resultado.nombre()).isEqualTo("RTX 4080");
         assertThat(resultado.categoria()).isEqualTo("GPU");
     }
 
@@ -82,14 +82,14 @@ class ComponenteServiceTest {
     void guardar_deberiaPersistirComponente_cuandoLaCategoriaExiste() {
         // Given
         Categoria categoria = new Categoria();
-        categoria.setId(2L);
+        categoria.setId(8L);
         categoria.setNombre("RAM");
         ComponenteRequestDTO dto = new ComponenteRequestDTO("RAM 16GB", "Kingston", 45000.0, 10, 2L);
 
         when(categoriaRepo.findById(2L)).thenReturn(Optional.of(categoria));
         when(repo.save(any(Componente.class))).thenAnswer(inv -> {
             Componente c = inv.getArgument(0);
-            c.setId(7L);
+            c.setId(8L);
             return c;
         });
 
@@ -97,7 +97,7 @@ class ComponenteServiceTest {
         ComponenteResponseDTO resultado = service.guardar(dto);
 
         // Then
-        assertThat(resultado.id()).isEqualTo(7L);
+        assertThat(resultado.id()).isEqualTo(8L);
         assertThat(resultado.categoria()).isEqualTo("RAM");
     }
 }
